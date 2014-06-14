@@ -14,9 +14,22 @@
       background: white;
       margin: 0;
       padding: 0;
+      text-align: center;
     }
     .image-crop {
       text-align: center;
+      margin: 0 auto;
+      width: 300px;
+      position: relative;
+
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      -o-user-select: none;
+      user-select: none;
+    }
+    .image-crop button {
+      margin-top: 50px;
     }
     .image-crop > section {
       background: #ccc;
@@ -37,11 +50,11 @@
     }
     .zoom-handle {
       display: block;
-      position: relative;
-      bottom: -83px;
+      position: absolute;
+      bottom: 70px;
       left: 0px;
       background: yellow;
-      width: 300px;
+      width: 100px;
       height: 100px;
       cursor: move;
     }
