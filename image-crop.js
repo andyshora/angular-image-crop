@@ -43,17 +43,16 @@ myApp.directive('imageCrop', function() {
       var newWidth = imgWidth, newHeight = imgHeight;
       var targetX = 0, targetY;
       var zoom = 1;
+      var maxZoomedInLevel = 0, mazZoomedOutLevel = 2;
+      var minXPos = 0, maxXPos = 0, minYPos = 0, maxYPos = 0; // for dragging bounds
       scope.zoom = 1;
       var ctx = $canvas.getContext('2d');
 
       // ---------- EVENT HANDLERS ---------- //
       fileReader.onload = function(e) {
          $img.src = fileReader.result;
-        imgWidth = $img.width;
-        imgHeight = $img.height;
           scope.step = 2;
           scope.$apply();
-         console.log(scope.dataUri);
       };
       
       element.on('change', function(e){
@@ -65,32 +64,80 @@ myApp.directive('imageCrop', function() {
       
       $img.onload = function(){
         ctx.drawImage($img, 0, 0);
+
+        imgWidth = $img.width;
+        imgHeight = $img.height;
         
         minLeft = scope.width - this.width;
         minTop = scope.height - this.height;
         newWidth = imgWidth;
         newHeight = imgHeight;
+
+        console.log('canvas width', $canvas.width);
+        console.log('image width', imgWidth);
+
+        maxZoomedInLevel = $canvas.width / imgWidth;
+        console.log('maxZoomedInLevel', maxZoomedInLevel);
+        
+        updateDragBounds();
+
       };
       
       // ---------- PRIVATE FUNCTIONS ---------- //
       function moveImage(x, y) {
+
+        console.log('moveImage', x, y);
+        
+
+        if ((x < minXPos) || (x > maxXPos) || (y < minYPos) || (y > maxYPos)) {
+          // new position is out of bounds, would show gutter
+          return;
+        }
         ctx.clearRect(0, 0, $canvas.width, $canvas.height);
         ctx.drawImage($img, x, y, newWidth, newHeight);
       }
+
+      function to2Dp(val) {
+        return Math.round(val * 1000) / 1000;
+      }
+
+      function updateDragBounds() {
+        // $img.width, $canvas.width, zoom
+        
+        minXPos = $canvas.width - ($img.width * zoom);
+        minYPos = $canvas.height - ($img.height * zoom);
+        console.log('minXPos', minXPos);
+        console.log('minYPos', minYPos);
+        
+      }
       
       function zoomImage(val) {
-        
-        // check if new zoom level is still fills canvas
-        if (($img.width * (zoom + val) < $canvas.width) || ($img.height * (zoom + val) < $canvas.height)) {
-          return;
 
-        } else {
-          scope.zoom = zoom = zoom + val;
-          newWidth = $img.width * zoom;
-          newHeight = $img.height * zoom;
+        var proposedZoomLevel = to2Dp(zoom + val);        
+
+        if ((proposedZoomLevel < maxZoomedInLevel) || (proposedZoomLevel > mazZoomedOutLevel)) {
+          // image wont fill whole canvas
+          // or image is too far zoomed in, it's gonna get pretty pixelated!
+          return;
         }
 
-        console.log('newWidth', newWidth, newHeight);
+        scope.zoom = zoom = proposedZoomLevel;
+
+        //  do image position adjustments so we don't see any gutter
+        if (proposedZoomLevel === maxZoomedInLevel) {
+          // image fills canvas perfectly, let's center it
+          ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+          ctx.drawImage($img, 0, 0, $canvas.width, $canvas.height);
+          return;
+        } else if (false) {
+          // grey gutter seen
+        }
+
+        newWidth = $img.width * zoom;
+        newHeight = $img.height * zoom;
+        
+
+        console.log('newDims', newWidth, newHeight);
         
         // console.log('drawImage', currentX, currentY, newWidth, newHeight);
 
@@ -101,6 +148,8 @@ myApp.directive('imageCrop', function() {
         // check if image is still going to fit the bounds of the box
         ctx.clearRect(0, 0, $canvas.width, $canvas.height);
         ctx.drawImage($img, currentX * zoom, currentY * zoom, newWidth, newHeight);
+
+        updateDragBounds();
         
         
       }
@@ -127,20 +176,37 @@ myApp.directive('imageCrop', function() {
       }
       
       // ---------- SCOPE FUNCTIONS ---------- //
-      scope.onCanvasMouseDown = function(e) {
-        startX = e.x;
-        startY = e.y;
-        zooming = false;
-        dragging = true;
-      };
+
       
       scope.onCanvasMouseUp = function(e) {
+        e.stopPropagation(); // if event was on canvas, stop it propagation up
         startX = 0;
         startY = 0;
         dragging = false;
         currentX = targetX;
         currentY = targetY;
+
+        removeBodyEventListener('mouseup', scope.onCanvasMouseUp);
+        removeBodyEventListener('mousemove', scope.onCanvasMouseMove);
       };
+
+      scope.onCanvasMouseDown = function(e) {
+        startX = e.x;
+        startY = e.y;
+        zooming = false;
+        dragging = true;
+
+        addBodyEventListener('mouseup', scope.onCanvasMouseUp);
+        addBodyEventListener('mousemove', scope.onCanvasMouseMove);
+      };
+
+      function addBodyEventListener(eventName, func) {
+        document.documentElement.addEventListener(eventName, func, false);
+      }
+
+      function removeBodyEventListener(eventName, func) {
+        document.documentElement.removeEventListener(eventName, func);
+      }
       
       scope.onHandleMouseDown = function(e) {
         startX = e.x;
@@ -174,31 +240,6 @@ myApp.directive('imageCrop', function() {
         targetX = currentX - diffX; // desired new X position
         targetY = currentY - diffY; // desired new X position
         
-        if (targetX > maxLeft) {
-          targetX = maxLeft;
-        } else if (targetX < minLeft) {
-          targetX = minLeft;
-        }
-        
-        if (targetY > maxTop) {
-          targetY = maxTop;
-        } else if (targetY < minTop) {
-          targetY = minTop;
-        }
-        
-        // imgWidth - canvasWidth to get overflow
-        // then check if targetX > overflow, if so, dont move
-        // var overflow = imgWidth - $canvas.width;
-
-        // console.log(($canvas.width - (imgWidth * zoom)), (imgWidth * zoom), targetX, minLeft);
-
-        console.log((imgWidth * zoom), Math.abs(($canvas.width - (imgWidth * zoom)) + targetX + minLeft));
-        
-        if (Math.abs(($canvas.width - (imgWidth * zoom)) + targetX + minLeft) > (imgWidth * zoom)) {
-          return;
-        }
-        
-        // console.log('targetX', targetX, $canvas.width, imgWidth, $canvas.width - imgWidth, minLeft);
         moveImage(targetX, targetY);
         
       };
