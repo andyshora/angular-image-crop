@@ -86,13 +86,12 @@ myApp.directive('imageCrop', function() {
       // ---------- PRIVATE FUNCTIONS ---------- //
       function moveImage(x, y) {
 
-        console.log('moveImage', x, y);
-        
-
         if ((x < minXPos) || (x > maxXPos) || (y < minYPos) || (y > maxYPos)) {
           // new position is out of bounds, would show gutter
           return;
         }
+        targetX = x;
+        targetY = y;
         ctx.clearRect(0, 0, $canvas.width, $canvas.height);
         ctx.drawImage($img, x, y, newWidth, newHeight);
       }
@@ -122,6 +121,7 @@ myApp.directive('imageCrop', function() {
         }
 
         scope.zoom = zoom = proposedZoomLevel;
+        updateDragBounds();
 
         //  do image position adjustments so we don't see any gutter
         if (proposedZoomLevel === maxZoomedInLevel) {
@@ -135,23 +135,27 @@ myApp.directive('imageCrop', function() {
 
         newWidth = $img.width * zoom;
         newHeight = $img.height * zoom;
+
+        var newXPos = currentX * zoom;
+        var newYPos = currentY * zoom;
         
 
-        console.log('newDims', newWidth, newHeight);
-        
-        // console.log('drawImage', currentX, currentY, newWidth, newHeight);
+        // check if we've exposed the gutter
+        if (newXPos < minXPos) {
+          newXPos = minXPos;
+        } else if (newXPos > maxXPos) {
+          newXPos = maxXPos;
+        }
 
-        // calc transformation origin
-        // var offsetX = 
-        // console.log('check if ' + ((currentX * zoom) + newWidth) + 'is less than ' + newWidth);
+        if (newYPos < minYPos) {
+          newYPos = minYPos;
+        } else if (newYPos > maxYPos) {
+          newYPos = maxYPos;
+        } 
 
         // check if image is still going to fit the bounds of the box
         ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-        ctx.drawImage($img, currentX * zoom, currentY * zoom, newWidth, newHeight);
-
-        updateDragBounds();
-        
-        
+        ctx.drawImage($img, newXPos, newYPos, newWidth, newHeight);
       }
       
       function calcZoomLevel(diffX, diffY) {
@@ -232,15 +236,13 @@ myApp.directive('imageCrop', function() {
         if (!dragging) {
           return false;
         }
-
-        // console.log('minLeft', minLeft);
                 
         var diffX = startX - e.x; // how far mouse has moved in current drag
         var diffY = startY - e.y; // how far mouse has moved in current drag
-        targetX = currentX - diffX; // desired new X position
-        targetY = currentY - diffY; // desired new X position
+        /*targetX = currentX - diffX; // desired new X position
+        targetY = currentY - diffY; // desired new X position*/
         
-        moveImage(targetX, targetY);
+        moveImage(currentX - diffX, currentY - diffY);
         
       };
       
@@ -258,9 +260,7 @@ myApp.directive('imageCrop', function() {
         
         var zoomVal = calcZoomLevel(targetX, targetY);
         zoomImage(zoomVal);
-        
-//         moveImage(targetX, targetY);
-        
+                
       };
 
       scope.zoomIn = function() {
