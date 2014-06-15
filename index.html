@@ -51,12 +51,24 @@
     .zoom-handle {
       display: block;
       position: absolute;
-      bottom: 70px;
-      left: 0px;
-      background: yellow;
-      width: 100px;
-      height: 100px;
+      bottom: 1px;
+      left: 1px;
+      background: rgba(255,255,255,0.7);
+      width: 80px;
+      height: 80px;
       cursor: move;
+      border-radius: 200px 50px;
+    }
+    .zoom-handle > span {
+      color: rgba(0, 0, 0, 0.5);
+      -webkit-transform: rotate(-45deg);
+      -moz-transform: rotate(-45deg);
+      -ms-transform: rotate(-45deg);
+      -o-transform: rotate(-45deg);
+      transform: rotate(-45deg);
+      display: block;
+      position: relative;
+      top: 30px;
     }
   </style>
   <body ng-app="myApp">
