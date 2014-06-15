@@ -753,7 +753,7 @@ myApp.controller('MainController', function($scope) {
 
 myApp.directive('imageCrop', function() {
   return {
-    template: '<div class="image-crop"><section ng-show="step==1"><input type="file" /></section><section ng-show="step==2"><canvas width="{{ width }}" height="{{ height }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)" ng-style="canvasStyles"></canvas>{{ zoom }}<div class="cropping-area"></div><div id="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)" class="zoom-handle"><span>&larr; zoom &rarr;</span></div></section></div>',
+    template: '<div class="image-crop"><section ng-show="step==1"><input type="file" /></section><section ng-show="step==2"><canvas width="{{ width }}" height="{{ height }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)" ng-style="canvasStyles"></canvas>{{ zoom }}<div class="cropping-area"></div><div id="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)" class="zoom-handle"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section id="section-final" ng-show="step==3"><img id="final-cropped-image" ng-src="{{ croppedDataUri }}" /></section></div>',
     restrict: 'AE',
     transclude: true,
     replace: true,
@@ -781,6 +781,7 @@ myApp.directive('imageCrop', function() {
       var $input = element.find('input[type=file]');
       var $canvas = element.find('canvas')[0];
       var $handle = document.getElementById('zoom-handle');
+      var $finalImg = document.getElementById('final-cropped-image');
       var $img = new Image();
       var fileReader = new FileReader();
 
@@ -821,7 +822,7 @@ myApp.directive('imageCrop', function() {
        });
       
       
-      $img.onload = function(){
+      $img.onload = function() {
         ctx.drawImage($img, 0, 0);
 
         imgWidth = $img.width;
@@ -973,21 +974,37 @@ myApp.directive('imageCrop', function() {
       
       function calcZoomLevel(diffX, diffY) {
         
-        var hyp = Math.sqrt( Math.pow(diffX, 2) + Math.pow(diffY, 2) );
-
-        console.log('diffX', diffX, diffY);
-        
-        var zoomGestureRatio = to2Dp(hyp / maxZoomGestureLength);
-
-        console.log('zoomGestureRatio', zoomGestureRatio);
-        
-
+        var hyp = Math.sqrt( Math.pow(diffX, 2) + Math.pow(diffY, 2) );        
+        var zoomGestureRatio = to2Dp(hyp / maxZoomGestureLength);        
         var newZoomDiff = to2Dp((maxZoomedOutLevel - maxZoomedInLevel) * zoomGestureRatio * zoomWeight);
         return diffX > 0 ? -newZoomDiff : newZoomDiff;
       }
       
       // ---------- SCOPE FUNCTIONS ---------- //
 
+      $finalImg.onload = function() {
+        var tempCanvas = document.createElement('canvas');
+        tempCanvas.width = this.width - 90;
+        tempCanvas.height = this.height - 90;
+        tempCanvas.style.display = 'none';
+        // console.log('tempCanvas.width', tempCanvas.width, tempCanvas.height);
+
+        var tempCanvasContext = tempCanvas.getContext('2d');
+        // console.log('tempCanvasContext', tempCanvasContext);
+        tempCanvasContext.drawImage($finalImg, -45, -45);
+
+        document.getElementById('section-final').appendChild(tempCanvas);
+        scope.finalDataUri = tempCanvas.toDataURL();
+
+        console.log('scope.finalDataUri', scope.finalDataUri);
+        
+        
+      };
+
+      scope.crop = function() {
+        scope.croppedDataUri = $canvas.toDataURL();
+        scope.step = 3;
+      };
       
       scope.onCanvasMouseUp = function(e) {
 
