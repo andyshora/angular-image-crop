@@ -5,20 +5,20 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 
 # Features
 
-* Touch support, swipe to move and double-touch gesture to zoom  - see known issues
+* Touch support, swipe to move and drag handle to zoom  - see known issues
 * Add any image file from your device/machine
 * Output as a base64-encoded data uri
 * Uses HTML5 Canvas to display image in a flexible context, to allow dragging and zooming.
 * Note that regardless of the shape of the cropping guideline, resulting images will be square. For example, using the 'circle' shape parameter will show a circular guide, but the resulting images will have to be masked when rendering to the user.
 
 # Browser Support
-* IE10+, Android 3+, iOS 6+
+* IE10+, Android 3+, iOS 6+, basically all modern browsers!
 
 # Usage
 
 1. Include the directive
 2. Include the stylesheet
-3. Initiatlise directive [see standalone JSBin](http://jsbin.com/yecaf/1/edit?javascript,output) for example code.
+3. Initiatlise the directive [see standalone JSBin](http://jsbin.com/yecaf/1/edit?javascript,output) for example code.
 
 ## Parameters
 
@@ -34,23 +34,21 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
  data-width="300"
  data-height="300"
  data-shape="circle"
- data-step="imageCropStep"
  data-result="imageCropResult"
- ng-show="showImageCropper"
 ></image-crop>
 ```
 
 # See a standalone working example
 [Working example on JSBin](http://jsbin.com/yecaf/1/edit?javascript,output)
 
-## Step 1. Choose image, drag to move and zoom
+## Step 1. Choose image, drag to move and drag corner handle to zoom
 
 ![Choose image](https://s3-eu-west-1.amazonaws.com/andyshora/crop-step-1.png)
 
-## Step 2. Result as a base64-encoded data uri
+## Step 2. Produces a result as a base64-encoded data uri
 
 ![Choose image](https://s3-eu-west-1.amazonaws.com/andyshora/crop-step-2.png)
 
 # Known Issues
 
-1. Currently not working with images captured on some mobile devices, due to orientation exif data being used by Mobile Safari. Other images on mobiles, including downloaded images are working fine.
+1. Currently not working with images captured on some mobile devices, due to orientation exif data being used mobile browsers. Other images on mobiles, including downloaded images are working fine.
