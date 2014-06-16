@@ -11,6 +11,9 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 
 Note: this is currently a work in progress, and will be 'modularized' with all of the above features when it's complete!
 
+# See a standalone working example on JSBin
+[Working example on JSBin](http://jsbin.com/yecaf/1/edit?javascript,output)
+
 ## Step 1. Choose image
 
 ![Choose image](https://s3-eu-west-1.amazonaws.com/andyshora/crop-1.png)
