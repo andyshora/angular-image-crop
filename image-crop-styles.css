@@ -22,13 +22,16 @@
   display: block;
   height: 200px;
   width: 200px;
-  border-radius: 150px;
+  
   background: rgba(255, 255, 255, .3);
   border: 2px dashed white;
   position: absolute;
   top: 50px;
   left: 50px;
   pointer-events: none;
+}
+.ng-image-crop--circle .cropping-area {
+  border-radius: 50%;
 }
 .ng-image-crop .cropping-canvas {
   background: 'rgba(255, 255, 255, .3)',

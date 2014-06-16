@@ -760,7 +760,7 @@
 
   angular.module('myApp').directive('imageCrop', function() {
     return {
-      template: '<div class="ng-image-crop"><section ng-show="step==1"><input type="file" /></section><section ng-show="step==2"><canvas class="cropping-canvas" width="{{ width }}" height="{{ height }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas>{{ zoom }}<div class="cropping-area"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section id="section-final" ng-show="step==3"><img class="final-cropped-image" ng-src="{{ croppedDataUri }}" /></section></div>',
+      template: '<div class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-show="step==1"><input type="file" /></section><section ng-show="step==2"><canvas class="cropping-canvas" width="{{ width }}" height="{{ height }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas><div class="cropping-area"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section id="section-final" ng-show="step==3"><img class="final-cropped-image" ng-src="{{ croppedDataUri }}" /></section></div>',
       replace: true,
       restrict: 'AE',
       scope: {
@@ -772,6 +772,9 @@
       },
       link: function (scope, element, attributes) {
         scope.step = scope.step || 1;
+        scope.shape = scope.shape || 'circle';
+        scope.width = scope.width || 300;
+        scope.height = scope.height || 300;
         
         var $input = element.find('input[type=file]');
         var $canvas = element.find('canvas')[0];
@@ -788,11 +791,17 @@
         var maxZoomGestureLength = 0;
         var maxZoomedInLevel = 0, maxZoomedOutLevel = 2;
         var minXPos = 0, maxXPos = 45, minYPos = 0, maxYPos = 45; // for dragging bounds
-        scope.zoom = 1;
 
         var zoomWeight = .4;
         var ctx = $canvas.getContext('2d');
         var exif = null;
+        var files = [];
+
+        // ---------- INLINE STYLES ----------- //
+        scope.moduleStyles = {
+          width: scope.width + 'px',
+          height: scope.height + 'px'
+        };
 
         // ---------- EVENT HANDLERS ---------- //
         fileReader.onload = function(e) {
@@ -805,11 +814,18 @@
           exif = EXIF.readFromBinaryFile(binary);
 
         };
+
+        function reset() {
+          files = [];
+          zoom = 1;
+          ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+          document.getElementsByTagName('input')[0].value = null;
+          $img.src = '';
+        }
         
         element.on('change', function(e){
-          var files = e.target.files;
+          files = e.target.files;
           fileReader.readAsDataURL(files[0]);
-          // console.log('files', files[0]);
          });
         
         
@@ -926,7 +942,7 @@
             return;
           }
 
-          scope.zoom = zoom = proposedZoomLevel;
+          zoom = proposedZoomLevel;
           // console.log('zoom', zoom);
           
           updateDragBounds();
@@ -987,6 +1003,8 @@
           document.getElementById('section-final').appendChild(tempCanvas);
           scope.result = tempCanvas.toDataURL();
           scope.$apply();
+
+          reset();
           
         };
 

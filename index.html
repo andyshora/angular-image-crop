@@ -55,13 +55,24 @@
       background: rgba(0,0,0,.3);
       margin: 40px auto;
     }
+    .result-datauri {
+      width: 300px;
+      height: 100px;
+      font-size: 11px;
+      line-height: 15px;
+      padding: 5px;
+      border: 1px solid black;
+      clear: both;
+      display: block;
+      margin: 20px auto;
+    }
   </style>
   <body>
      <div ng-controller="MainController">
       <h2>Angular Image Cropper</h2>
       <p>An AngularJS Directive by <a href="https://twitter.com/andyshora">@andyshora</a></p>
       <hr>
-      <p ng-hide="imageCropResult||imageCropStep!=1">Let's get started &rarr;<a ng-click="showImageCropper=true;imageCropStep=1">Crop Image</a></p>
+      <p ng-hide="imageCropResult||imageCropStep!=1">Let's get started &rarr; <a ng-click="showImageCropper=true;imageCropStep=1">Crop Image</a></p>
       <p ng-show="imageCropResult">Wanna start over? &rarr; <a ng-click="imageCropResult=null;imageCropStep=1">Reset</a></p>
        <image-crop
          data-width="300"
@@ -73,7 +84,12 @@
        ></image-crop>
        <hr>
        <h2>Result</h2>
-       <img ng-src="{{ imageCropResult }}" ng-show="imageCropResult" alt="">
+       <div ng-show="imageCropResult">
+         <img ng-src="{{ imageCropResult }}" alt="The Cropped Image">
+         <p>And this is the actual data uri which represents the cropped image, which you'll then upload to your server:</p>
+         <textarea class="result-datauri">{{ imageCropResult }}</textarea>
+       </div>
+       
        <p ng-hide="imageCropResult">Not cropped yet</p>
      </div>
   </body>
