@@ -18,7 +18,7 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 
 1. Include the directive
 2. Include the stylesheet
-3. Initiatlise the directive [see standalone JSBin](http://jsbin.com/yecaf/1/edit?javascript,output) for example code.
+3. Initiatlise the directive [see standalone JSBin](http://jsbin.com/fovovu/1/edit?javascript,output) for example code.
 
 ## Parameters
 
@@ -39,7 +39,7 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 ```
 
 # See a standalone working example
-[Working example on JSBin](http://jsbin.com/yecaf/1/edit?javascript,output)
+[Working example on JSBin](http://jsbin.com/fovovu/1/edit?javascript,output)
 
 ## Step 1. Choose image, drag to move and drag corner handle to zoom
 
