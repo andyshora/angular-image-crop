@@ -767,10 +767,11 @@
         width: '@',
         height: '@',
         shape: '@',
-        result: '='
+        result: '=',
+        step: '='
       },
       link: function (scope, element, attributes) {
-        scope.step = 1;
+        scope.step = scope.step || 1;
         
         var $input = element.find('input[type=file]');
         var $canvas = element.find('canvas')[0];

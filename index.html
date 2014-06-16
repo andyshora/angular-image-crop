@@ -18,6 +18,7 @@
           console.log('MainController');
 
           $scope.imageCropResult = null;
+          $scope.showImageCropper = false;
 
           $scope.$watch('imageCropResult', function(newVal) {
             if (newVal) {
@@ -42,15 +43,38 @@
       padding: 0;
       text-align: center;
     }
+    a {
+      text-decoration: underline;
+      color: blue;
+      cursor: pointer;
+    }
+    hr {
+      border: none;
+      height: 1px;
+      width: 80%;
+      background: rgba(0,0,0,.3);
+      margin: 40px auto;
+    }
   </style>
   <body>
      <div ng-controller="MainController">
+      <h2>Angular Image Cropper</h2>
+      <p>An AngularJS Directive by <a href="https://twitter.com/andyshora">@andyshora</a></p>
+      <hr>
+      <p ng-hide="imageCropResult||imageCropStep!=1">Let's get started &rarr;<a ng-click="showImageCropper=true;imageCropStep=1">Crop Image</a></p>
+      <p ng-show="imageCropResult">Wanna start over? &rarr; <a ng-click="imageCropResult=null;imageCropStep=1">Reset</a></p>
        <image-crop
          data-width="300"
          data-height="300"
          data-shape="circle"
+         data-step="imageCropStep"
          data-result="imageCropResult"
+         ng-show="showImageCropper"
        ></image-crop>
+       <hr>
+       <h2>Result</h2>
+       <img ng-src="{{ imageCropResult }}" ng-show="imageCropResult" alt="">
+       <p ng-hide="imageCropResult">Not cropped yet</p>
      </div>
   </body>
 </html>
