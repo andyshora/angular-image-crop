@@ -5,7 +5,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>Test</title>
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+  <!-- REQUIRED 1/3 - AngularJS Core -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.11/angular.min.js"></script>
+  <!-- REQUIRED 2/3 - styles for the image crop component -->
+  <link rel="stylesheet" href="image-crop-styles.css">
   <script>
     var myApp = null;
     (function() {
@@ -13,13 +16,24 @@
       angular.module('myApp', [])
         .controller('MainController', function($scope) {
           console.log('MainController');
+
+          $scope.imageCropResult = null;
+
+          $scope.$watch('imageCropResult', function(newVal) {
+            if (newVal) {
+              console.log('imageCropResult', newVal);
+            }
+            
+          });
           
         });
 
     })();
   </script>  
+  <!-- REQUIRED 3/3 - the image crop directive -->
   <script src="image-crop.js"></script>
   <style>
+    /* Styles for this demo page */
     body {
       font-size: 12px;
       font-family: Helvetica, Arial;
@@ -28,60 +42,6 @@
       padding: 0;
       text-align: center;
     }
-    .image-crop {
-      text-align: center;
-      margin: 0 auto;
-      width: 300px;
-      position: relative;
-
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      -o-user-select: none;
-      user-select: none;
-    }
-    .image-crop button {
-      margin-top: 50px;
-    }
-    .image-crop > section {
-      background: #ccc;
-      height: 300px;
-      width: 300px;
-    }
-    .cropping-area {
-      display: block;
-      height: 200px;
-      width: 200px;
-      border-radius: 150px;
-      background: rgba(255, 255, 255, .3);
-      border: 2px dashed white;
-      position: absolute;
-      top: 50px;
-      left: 50px;
-      pointer-events: none;
-    }
-    .zoom-handle {
-      display: block;
-      position: absolute;
-      bottom: 1px;
-      left: 1px;
-      background: rgba(255,255,255,0.7);
-      width: 80px;
-      height: 80px;
-      cursor: move;
-      border-radius: 200px 50px;
-    }
-    .zoom-handle > span {
-      color: rgba(0, 0, 0, 0.5);
-      -webkit-transform: rotate(-45deg);
-      -moz-transform: rotate(-45deg);
-      -ms-transform: rotate(-45deg);
-      -o-transform: rotate(-45deg);
-      transform: rotate(-45deg);
-      display: block;
-      position: relative;
-      top: 30px;
-    }
   </style>
   <body>
      <div ng-controller="MainController">
@@ -89,7 +49,7 @@
          data-width="300"
          data-height="300"
          data-shape="circle"
-         
+         data-result="imageCropResult"
        ></image-crop>
      </div>
   </body>

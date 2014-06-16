@@ -1,0 +1,62 @@
+.ng-image-crop {
+  text-align: center;
+  margin: 0 auto;
+  width: 300px;
+  position: relative;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+.ng-image-crop > section {
+  background: #ccc;
+  height: 300px;
+  width: 300px;
+}
+.ng-image-crop button {
+  margin-top: 50px;
+}
+.ng-image-crop .cropping-area {
+  display: block;
+  height: 200px;
+  width: 200px;
+  border-radius: 150px;
+  background: rgba(255, 255, 255, .3);
+  border: 2px dashed white;
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  pointer-events: none;
+}
+.ng-image-crop .cropping-canvas {
+  background: 'rgba(255, 255, 255, .3)',
+  margin: '0 auto',
+  cursor: 'move',
+  width: scope.width,
+  height: scope.height
+}
+
+.ng-image-crop .zoom-handle {
+  display: block;
+  position: absolute;
+  bottom: 1px;
+  left: 1px;
+  background: rgba(255,255,255,0.7);
+  width: 80px;
+  height: 80px;
+  cursor: move;
+  border-radius: 200px 50px;
+}
+.ng-image-crop .zoom-handle > span {
+  color: rgba(0, 0, 0, 0.5);
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+  display: block;
+  position: relative;
+  top: 30px;
+}
