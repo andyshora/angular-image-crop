@@ -760,7 +760,7 @@
 
   angular.module('myApp').directive('imageCrop', function() {
     return {
-      template: '<div class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"><input type="file" class="image-crop-filepicker" /></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ width }}" height="{{ height }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section ng-style="sectionStyles" class="section-final" ng-show="step==3"><img class="final-cropped-image" ng-src="{{ croppedDataUri }}" /></section></div>',
+      template: '<div class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"><input type="file" class="image-crop-filepicker" /></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ canvasWidth }}" height="{{ canvasHeight }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section ng-style="sectionStyles" class="section-final" ng-show="step==3"><img class="final-cropped-image" ng-src="{{ croppedDataUri }}" /></section></div>',
       replace: true,
       restrict: 'AE',
       scope: {
@@ -773,8 +773,11 @@
       link: function (scope, element, attributes) {
         scope.step = scope.step || 1;
         scope.shape = scope.shape || 'circle';
-        scope.width = scope.width || 300;
-        scope.height = scope.height || 300;
+        scope.width = parseInt(scope.width, 10) || 300;
+        scope.height = parseInt(scope.height, 10) || 300;
+
+        scope.canvasWidth = scope.width + 100;
+        scope.canvasHeight = scope.height + 100;
         
         var $input = element.find('input[type=file]');
         var $canvas = element.find('canvas')[0];
@@ -790,7 +793,7 @@
         var zoom = 1;
         var maxZoomGestureLength = 0;
         var maxZoomedInLevel = 0, maxZoomedOutLevel = 2;
-        var minXPos = 0, maxXPos = 45, minYPos = 0, maxYPos = 45; // for dragging bounds
+        var minXPos = 0, maxXPos = 50, minYPos = 0, maxYPos = 50; // for dragging bounds
 
         var zoomWeight = .4;
         var ctx = $canvas.getContext('2d');
@@ -799,18 +802,18 @@
 
         // ---------- INLINE STYLES ----------- //
         scope.moduleStyles = {
-          width: scope.width + 'px',
-          height: scope.height + 'px'
+          width: (scope.width + 100) + 'px',
+          height: (scope.height + 100) + 'px'
         };
 
         scope.sectionStyles = {
-          width: scope.width + 'px',
-          height: scope.height + 'px'
+          width: (scope.width + 100) + 'px',
+          height: (scope.height + 100) + 'px'
         };
 
         scope.croppingGuideStyles = {
-          width: (scope.width - 100) + 'px',
-          height: (scope.height - 100) + 'px',
+          width: scope.width + 'px',
+          height: scope.height + 'px',
           top: '50px',
           left: '50px'
         };
@@ -895,15 +898,15 @@
             }
           }
           
-          minLeft = scope.width - this.width;
-          minTop = scope.height - this.height;
+          minLeft = (scope.width + 100) - this.width;
+          minTop = (scope.height + 100) - this.height;
           newWidth = imgWidth;
           newHeight = imgHeight;
 
           // console.log('canvas width', $canvas.width);
           // console.log('image width', imgWidth);
 
-          maxZoomedInLevel = ($canvas.width - 90) / imgWidth;
+          maxZoomedInLevel = ($canvas.width - 100) / imgWidth;
           // console.log('maxZoomedInLevel', maxZoomedInLevel);
 
           maxZoomGestureLength = to2Dp(Math.sqrt(Math.pow($canvas.width, 2) + Math.pow($canvas.height, 2)));
@@ -1003,14 +1006,14 @@
 
         $finalImg.onload = function() {
           var tempCanvas = document.createElement('canvas');
-          tempCanvas.width = this.width - 90;
-          tempCanvas.height = this.height - 90;
+          tempCanvas.width = this.width - 100;
+          tempCanvas.height = this.height - 100;
           tempCanvas.style.display = 'none';
           // console.log('tempCanvas.width', tempCanvas.width, tempCanvas.height);
 
           var tempCanvasContext = tempCanvas.getContext('2d');
           // console.log('tempCanvasContext', tempCanvasContext);
-          tempCanvasContext.drawImage($finalImg, -45, -45);
+          tempCanvasContext.drawImage($finalImg, -50, -50);
 
           document.getElementsByClassName('section-final')[0].appendChild(tempCanvas);
           scope.result = tempCanvas.toDataURL();
