@@ -760,7 +760,7 @@
 
   angular.module('myApp').directive('imageCrop', function() {
     return {
-      template: '<div class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-show="step==1"><input type="file" /></section><section ng-show="step==2"><canvas class="cropping-canvas" width="{{ width }}" height="{{ height }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas><div class="cropping-area"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section id="section-final" ng-show="step==3"><img class="final-cropped-image" ng-src="{{ croppedDataUri }}" /></section></div>',
+      template: '<div class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"><input type="file" /></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ width }}" height="{{ height }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section ng-style="sectionStyles" class="section-final" ng-show="step==3"><img class="final-cropped-image" ng-src="{{ croppedDataUri }}" /></section></div>',
       replace: true,
       restrict: 'AE',
       scope: {
@@ -801,6 +801,18 @@
         scope.moduleStyles = {
           width: scope.width + 'px',
           height: scope.height + 'px'
+        };
+
+        scope.sectionStyles = {
+          width: scope.width + 'px',
+          height: scope.height + 'px'
+        };
+
+        scope.croppingGuideStyles = {
+          width: (scope.width - 100) + 'px',
+          height: (scope.height - 100) + 'px',
+          top: '50px',
+          left: '50px'
         };
 
         // ---------- EVENT HANDLERS ---------- //
@@ -922,8 +934,8 @@
         function updateDragBounds() {
           // $img.width, $canvas.width, zoom
           
-          minXPos = $canvas.width - ($img.width * zoom) - 45;
-          minYPos = $canvas.height - ($img.height * zoom) - 45;
+          minXPos = $canvas.width - ($img.width * zoom) - 50;
+          minYPos = $canvas.height - ($img.height * zoom) - 50;
           
         }
         
@@ -1000,7 +1012,7 @@
           // console.log('tempCanvasContext', tempCanvasContext);
           tempCanvasContext.drawImage($finalImg, -45, -45);
 
-          document.getElementById('section-final').appendChild(tempCanvas);
+          document.getElementsByClassName('section-final')[0].appendChild(tempCanvas);
           scope.result = tempCanvas.toDataURL();
           scope.$apply();
 
