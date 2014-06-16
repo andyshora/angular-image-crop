@@ -760,7 +760,7 @@
 
   angular.module('myApp').directive('imageCrop', function() {
     return {
-      template: '<div class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"><input type="file" /></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ width }}" height="{{ height }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section ng-style="sectionStyles" class="section-final" ng-show="step==3"><img class="final-cropped-image" ng-src="{{ croppedDataUri }}" /></section></div>',
+      template: '<div class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"><input type="file" class="image-crop-filepicker" /></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ width }}" height="{{ height }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section ng-style="sectionStyles" class="section-final" ng-show="step==3"><img class="final-cropped-image" ng-src="{{ croppedDataUri }}" /></section></div>',
       replace: true,
       restrict: 'AE',
       scope: {
@@ -831,7 +831,7 @@
           files = [];
           zoom = 1;
           ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-          document.getElementsByTagName('input')[0].value = null;
+          document.getElementsByClassName('image-crop-filepicker')[0].value = null;
           $img.src = '';
         }
         
