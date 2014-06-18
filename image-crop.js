@@ -176,7 +176,7 @@
           0x9214: "SubjectArea", // Location and area of main subject
           0x920A: "FocalLength", // Focal length of the lens in mm
           0xA20B: "FlashEnergy", // Strobe energy in BCPS
-          0xA20C: "SpatialFrequencyResponse", // 
+          0xA20C: "SpatialFrequencyResponse", //
           0xA20E: "FocalPlaneXResolution", // Number of pixels in width direction per FocalPlaneResolutionUnit
           0xA20F: "FocalPlaneYResolution", // Number of pixels in height direction per FocalPlaneResolutionUnit
           0xA210: "FocalPlaneResolutionUnit", // Unit for measuring FocalPlaneXResolution and FocalPlaneYResolution
@@ -196,7 +196,7 @@
           0xA408: "Contrast", // Direction of contrast processing applied by camera
           0xA409: "Saturation", // Direction of saturation processing applied by camera
           0xA40A: "Sharpness", // Direction of sharpness processing applied by camera
-          0xA40B: "DeviceSettingDescription", // 
+          0xA40B: "DeviceSettingDescription", //
           0xA40C: "SubjectDistanceRange", // Distance to subject
 
           // other tags
@@ -451,7 +451,7 @@
 
               marker = file.getByteAt(offset + 1);
 
-              // we could implement handling for other markers here, 
+              // we could implement handling for other markers here,
               // but we're only looking for 0xFFE1 for EXIF data
 
               if (marker == 22400) {
@@ -758,7 +758,8 @@
 
   })();
 
-  angular.module('myApp').directive('imageCrop', function() {
+  angular.module('ImageCropper',[])
+    .directive('imageCrop', function() {
     return {
       template: '<div class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"><input type="file" class="image-crop-filepicker" /></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ canvasWidth }}" height="{{ canvasHeight }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section ng-style="sectionStyles" class="section-final" ng-show="step==3"><img class="final-cropped-image" ng-src="{{ croppedDataUri }}" /></section></div>',
       replace: true,
@@ -778,7 +779,7 @@
 
         scope.canvasWidth = scope.width + 100;
         scope.canvasHeight = scope.height + 100;
-        
+
         var $input = element.find('input[type=file]');
         var $canvas = element.find('canvas')[0];
         var $handle = document.getElementsByClassName('zoom-handle')[0];
@@ -786,7 +787,7 @@
         var $img = new Image();
         var fileReader = new FileReader();
 
-        var maxLeft = 0, minLeft = 0, maxTop = 0, minTop = 0, imgLoaded = false, imgWidth = 0, imgHeight = 0;         
+        var maxLeft = 0, minLeft = 0, maxTop = 0, minTop = 0, imgLoaded = false, imgWidth = 0, imgHeight = 0;
         var currentX = 0, currentY = 0, dragging = false, startX = 0, startY = 0, zooming = false;
         var newWidth = imgWidth, newHeight = imgHeight;
         var targetX = 0, targetY = 0;
@@ -837,13 +838,13 @@
           document.getElementsByClassName('image-crop-filepicker')[0].value = null;
           $img.src = '';
         }
-        
+
         element.on('change', function(e){
           files = e.target.files;
           fileReader.readAsDataURL(files[0]);
          });
-        
-        
+
+
         $img.onload = function() {
           ctx.drawImage($img, 0, 0);
 
@@ -897,7 +898,7 @@
                   break;
             }
           }
-          
+
           minLeft = (scope.width + 100) - this.width;
           minTop = (scope.height + 100) - this.height;
           newWidth = imgWidth;
@@ -911,14 +912,14 @@
 
           maxZoomGestureLength = to2Dp(Math.sqrt(Math.pow($canvas.width, 2) + Math.pow($canvas.height, 2)));
           // console.log('maxZoomGestureLength', maxZoomGestureLength);
-          
-          
+
+
           updateDragBounds();
 
         };
-        
+
         // ---------- PRIVATE FUNCTIONS ---------- //
-        function moveImage(x, y) {        
+        function moveImage(x, y) {
 
           if ((x < minXPos) || (x > maxXPos) || (y < minYPos) || (y > maxYPos)) {
             // new position is out of bounds, would show gutter
@@ -936,20 +937,20 @@
 
         function updateDragBounds() {
           // $img.width, $canvas.width, zoom
-          
+
           minXPos = $canvas.width - ($img.width * zoom) - 50;
           minYPos = $canvas.height - ($img.height * zoom) - 50;
-          
+
         }
-        
+
         function zoomImage(val) {
 
           if (!val) {
             return;
           }
-          
 
-          var proposedZoomLevel = to2Dp(zoom + val);        
+
+          var proposedZoomLevel = to2Dp(zoom + val);
 
           if ((proposedZoomLevel < maxZoomedInLevel) || (proposedZoomLevel > maxZoomedOutLevel)) {
             // image wont fill whole canvas
@@ -959,7 +960,7 @@
 
           zoom = proposedZoomLevel;
           // console.log('zoom', zoom);
-          
+
           updateDragBounds();
 
           //  do image position adjustments so we don't see any gutter
@@ -974,7 +975,7 @@
           newHeight = $img.height * zoom;
 
           var newXPos = currentX * zoom;
-          var newYPos = currentY * zoom;        
+          var newYPos = currentY * zoom;
 
           // check if we've exposed the gutter
           if (newXPos < minXPos) {
@@ -987,21 +988,21 @@
             newYPos = minYPos;
           } else if (newYPos > maxYPos) {
             newYPos = maxYPos;
-          }        
+          }
 
           // check if image is still going to fit the bounds of the box
           ctx.clearRect(0, 0, $canvas.width, $canvas.height);
           ctx.drawImage($img, newXPos, newYPos, newWidth, newHeight);
         }
-        
+
         function calcZoomLevel(diffX, diffY) {
-          
-          var hyp = Math.sqrt( Math.pow(diffX, 2) + Math.pow(diffY, 2) );        
-          var zoomGestureRatio = to2Dp(hyp / maxZoomGestureLength);        
+
+          var hyp = Math.sqrt( Math.pow(diffX, 2) + Math.pow(diffY, 2) );
+          var zoomGestureRatio = to2Dp(hyp / maxZoomGestureLength);
           var newZoomDiff = to2Dp((maxZoomedOutLevel - maxZoomedInLevel) * zoomGestureRatio * zoomWeight);
           return diffX > 0 ? -newZoomDiff : newZoomDiff;
         }
-        
+
         // ---------- SCOPE FUNCTIONS ---------- //
 
         $finalImg.onload = function() {
@@ -1020,14 +1021,14 @@
           scope.$apply();
 
           reset();
-          
+
         };
 
         scope.crop = function() {
           scope.croppedDataUri = $canvas.toDataURL();
           scope.step = 3;
         };
-        
+
         scope.onCanvasMouseUp = function(e) {
 
           if (!dragging) {
@@ -1055,7 +1056,7 @@
           startX = e.type === 'touchstart' ? e.changedTouches[0].clientX : e.clientX;
           startY = e.type === 'touchstart' ? e.changedTouches[0].clientY : e.clientY;
           zooming = false;
-          dragging = true;          
+          dragging = true;
 
           addBodyEventListener('mouseup', scope.onCanvasMouseUp);
           addBodyEventListener('mousemove', scope.onCanvasMouseMove);
@@ -1070,8 +1071,8 @@
         function removeBodyEventListener(eventName, func) {
           document.documentElement.removeEventListener(eventName, func);
         }
-        
-        scope.onHandleMouseDown = function(e) {          
+
+        scope.onHandleMouseDown = function(e) {
 
           e.preventDefault();
           e.stopPropagation(); // if event was on handle, stop it propagating up
@@ -1088,7 +1089,7 @@
         };
 
         $handle.addEventListener('touchstart', scope.onHandleMouseDown, false);
-        
+
         scope.onHandleMouseUp = function(e) {
 
           // this is applied on the whole section so check we're zooming
@@ -1103,7 +1104,7 @@
           startY = 0;
           zooming = false;
           currentX = targetX;
-          currentY = targetY;        
+          currentY = targetY;
 
           removeBodyEventListener('mouseup', scope.onHandleMouseUp);
           removeBodyEventListener('touchend', scope.onHandleMouseUp);
@@ -1113,57 +1114,58 @@
 
         $handle.addEventListener('touchend', scope.onHandleMouseUp, false);
 
-        
+
         scope.onCanvasMouseMove = function(e) {
 
           e.preventDefault();
           e.stopPropagation();
-          
+
           if (!dragging) {
             return;
           }
 
-          
-                  
+
+
           var diffX = startX - ((e.type === 'touchmove') ? e.changedTouches[0].clientX : e.clientX); // how far mouse has moved in current drag
           var diffY = startY - ((e.type === 'touchmove') ? e.changedTouches[0].clientY : e.clientY); // how far mouse has moved in current drag
           /*targetX = currentX - diffX; // desired new X position
           targetY = currentY - diffY; // desired new X position*/
-          
+
           moveImage(currentX - diffX, currentY - diffY);
-          
+
         };
 
         $canvas.addEventListener('touchmove', scope.onCanvasMouseMove, false);
 
 
         var lastHandleX = null, lastHandleY = null;
-        
+
         scope.onHandleMouseMove = function(e) {
 
           e.stopPropagation();
           e.preventDefault();
-          
+
           // this is applied on the whole section so check we're zooming
           if (!zooming) {
             return false;
           }
-                  
+
           var diffX = lastHandleX - ((e.type === 'touchmove') ? e.changedTouches[0].clientX : e.clientX); // how far mouse has moved in current drag
           var diffY = lastHandleY - ((e.type === 'touchmove') ? e.changedTouches[0].clientY : e.clientY); // how far mouse has moved in current drag
-          
+
           lastHandleX = (e.type === 'touchmove') ? e.changedTouches[0].clientX : e.clientX;
           lastHandleY = (e.type === 'touchmove') ? e.changedTouches[0].clientY : e.clientY;
 
           var zoomVal = calcZoomLevel(diffX, diffY);
           zoomImage(zoomVal);
-                  
+
         };
 
         $handle.addEventListener('touchmove', scope.onHandleMouseMove, false);
-        
+
       }
     };
   });
+
 
 })();
