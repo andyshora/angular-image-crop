@@ -16,7 +16,7 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 
 # Usage
 
-1. Include the directive
+1. Add the dependency : `angular.module('myApp',['ImageCropper'])`
 2. Include the stylesheet
 3. Initiatlise the directive [see standalone JSBin](http://jsbin.com/fovovu/1/edit?javascript,output) for example code.
 

@@ -13,7 +13,7 @@
     var myApp = null;
     (function() {
 
-      angular.module('myApp', [])
+      angular.module('myApp', ['ImageCropper'])
         .controller('MainController', function($scope) {
           console.log('MainController');
 
@@ -24,13 +24,13 @@
             if (newVal) {
               console.log('imageCropResult', newVal);
             }
-            
+
           });
-          
+
         });
 
     })();
-  </script>  
+  </script>
   <!-- REQUIRED 3/3 - the image crop directive -->
   <script src="image-crop.js"></script>
   <style>
@@ -91,7 +91,7 @@
          <p>And this is the actual data uri which represents the cropped image, which you'll then upload to your server:</p>
          <textarea class="result-datauri">{{ imageCropResult }}</textarea>
        </div>
-       
+
        <p ng-hide="imageCropResult">Not cropped yet</p>
      </div>
   </body>
