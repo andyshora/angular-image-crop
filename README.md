@@ -55,3 +55,7 @@ Note that the last 2 parameters shown must exist as variables in the scope of th
 # Known Issues
 
 1. Currently not working with images captured on some mobile devices, due to orientation exif data being used mobile browsers. Other images on mobiles, including downloaded images are working fine.
+
+# Updates
+
+- Now works with multiple instances

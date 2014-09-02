@@ -1,5 +1,5 @@
 /**
- * AngularJS Directive - Image Crop v1.0
+ * AngularJS Directive - Image Crop v1.1
  * Copyright (c) 2014 Andy Shora, andyshora@gmail.com, andyshora.com
  * Licensed under the MPL License [http://www.nihilogic.dk/licenses/mpl-license.txt]
  */
@@ -760,412 +760,415 @@
 
   angular.module('ImageCropper',[])
     .directive('imageCrop', function() {
-    return {
-      template: '<div class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"><input type="file" class="image-crop-filepicker" /></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ canvasWidth }}" height="{{ canvasHeight }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section ng-style="sectionStyles" class="section-final" ng-show="step==3"><img class="final-cropped-image" ng-src="{{ croppedDataUri }}" /></section></div>',
-      replace: true,
-      restrict: 'AE',
-      scope: {
-        width: '@',
-        height: '@',
-        shape: '@',
-        result: '=',
-        step: '='
-      },
-      link: function (scope, element, attributes) {
-        scope.step = scope.step || 1;
-        scope.shape = scope.shape || 'circle';
-        scope.width = parseInt(scope.width, 10) || 300;
-        scope.height = parseInt(scope.height, 10) || 300;
 
-        scope.canvasWidth = scope.width + 100;
-        scope.canvasHeight = scope.height + 100;
+      return {
+        template: '<div id="image-crop-{{ rand }}" class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"><input type="file" class="image-crop-input" /></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ canvasWidth }}" height="{{ canvasHeight }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section ng-style="sectionStyles" class="image-crop-section-final" ng-show="step==3"><img class="image-crop-final" ng-src="{{ croppedDataUri }}" /></section></div>',
+        replace: true,
+        restrict: 'AE',
+        scope: {
+          width: '@',
+          height: '@',
+          shape: '@',
+          result: '=',
+          step: '='
+        },
+        link: function (scope, element, attributes) {
 
-        var $input = element.find('input[type=file]');
-        var $canvas = element.find('canvas')[0];
-        var $handle = document.getElementsByClassName('zoom-handle')[0];
-        var $finalImg = document.getElementsByClassName('final-cropped-image')[0];
-        var $img = new Image();
-        var fileReader = new FileReader();
+          scope.rand = Math.round(Math.random() * 99999);
+          scope.step = scope.step || 1;
+          scope.shape = scope.shape || 'circle';
+          scope.width = parseInt(scope.width, 10) || 300;
+          scope.height = parseInt(scope.height, 10) || 300;
 
-        var maxLeft = 0, minLeft = 0, maxTop = 0, minTop = 0, imgLoaded = false, imgWidth = 0, imgHeight = 0;
-        var currentX = 0, currentY = 0, dragging = false, startX = 0, startY = 0, zooming = false;
-        var newWidth = imgWidth, newHeight = imgHeight;
-        var targetX = 0, targetY = 0;
-        var zoom = 1;
-        var maxZoomGestureLength = 0;
-        var maxZoomedInLevel = 0, maxZoomedOutLevel = 2;
-        var minXPos = 0, maxXPos = 50, minYPos = 0, maxYPos = 50; // for dragging bounds
+          scope.canvasWidth = scope.width + 100;
+          scope.canvasHeight = scope.height + 100;
 
-        var zoomWeight = .4;
-        var ctx = $canvas.getContext('2d');
-        var exif = null;
-        var files = [];
+          var $elm = element[0];
 
-        // ---------- INLINE STYLES ----------- //
-        scope.moduleStyles = {
-          width: (scope.width + 100) + 'px',
-          height: (scope.height + 100) + 'px'
-        };
+          var $input = $elm.getElementsByClassName('image-crop-input')[0];
+          var $canvas = $elm.getElementsByClassName('cropping-canvas')[0];
+          var $handle = $elm.getElementsByClassName('zoom-handle')[0];
+          var $finalImg = $elm.getElementsByClassName('image-crop-final')[0];
+          var $img = new Image();
+          var fileReader = new FileReader();
 
-        scope.sectionStyles = {
-          width: (scope.width + 100) + 'px',
-          height: (scope.height + 100) + 'px'
-        };
+          var maxLeft = 0, minLeft = 0, maxTop = 0, minTop = 0, imgLoaded = false, imgWidth = 0, imgHeight = 0;
+          var currentX = 0, currentY = 0, dragging = false, startX = 0, startY = 0, zooming = false;
+          var newWidth = imgWidth, newHeight = imgHeight;
+          var targetX = 0, targetY = 0;
+          var zoom = 1;
+          var maxZoomGestureLength = 0;
+          var maxZoomedInLevel = 0, maxZoomedOutLevel = 2;
+          var minXPos = 0, maxXPos = 50, minYPos = 0, maxYPos = 50; // for dragging bounds
 
-        scope.croppingGuideStyles = {
-          width: scope.width + 'px',
-          height: scope.height + 'px',
-          top: '50px',
-          left: '50px'
-        };
+          var zoomWeight = .4;
+          var ctx = $canvas.getContext('2d');
+          var exif = null;
+          var files = [];
 
-        // ---------- EVENT HANDLERS ---------- //
-        fileReader.onload = function(e) {
-          $img.src = this.result;
-          scope.step = 2;
-          scope.$apply();
+          // ---------- INLINE STYLES ----------- //
+          scope.moduleStyles = {
+            width: (scope.width + 100) + 'px',
+            height: (scope.height + 100) + 'px'
+          };
 
-          var byteString = atob(this.result.split(',')[1]);
-          var binary = new BinaryFile(byteString, 0, byteString.length);
-          exif = EXIF.readFromBinaryFile(binary);
+          scope.sectionStyles = {
+            width: (scope.width + 100) + 'px',
+            height: (scope.height + 100) + 'px'
+          };
 
-        };
+          scope.croppingGuideStyles = {
+            width: scope.width + 'px',
+            height: scope.height + 'px',
+            top: '50px',
+            left: '50px'
+          };
 
-        function reset() {
-          files = [];
-          zoom = 1;
-          ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-          document.getElementsByClassName('image-crop-filepicker')[0].value = null;
-          $img.src = '';
-        }
+          // ---------- EVENT HANDLERS ---------- //
+          fileReader.onload = function(e) {
+            $img.src = this.result;
+            scope.step = 2;
+            scope.$apply();
 
-        element.on('change', function(e){
-          files = e.target.files;
-          fileReader.readAsDataURL(files[0]);
-         });
+            var byteString = atob(this.result.split(',')[1]);
+            var binary = new BinaryFile(byteString, 0, byteString.length);
+            exif = EXIF.readFromBinaryFile(binary);
 
+          };
 
-        $img.onload = function() {
-          ctx.drawImage($img, 0, 0);
-
-          imgWidth = $img.width;
-          imgHeight = $img.height;
-
-          if (exif && exif.Orientation) {
-
-            // change mobile orientation, if required
-            switch(exif.Orientation){
-              case 1:
-                  // nothing
-                  break;
-              case 2:
-                  // horizontal flip
-                  ctx.translate(imgWidth, 0);
-                  ctx.scale(-1, 1);
-                  break;
-              case 3:
-                  // 180 rotate left
-                  ctx.translate(imgWidth, imgHeight);
-                  ctx.rotate(Math.PI);
-                  break;
-              case 4:
-                  // vertical flip
-                  ctx.translate(0, imgHeight);
-                  ctx.scale(1, -1);
-                  break;
-              case 5:
-                  // vertical flip + 90 rotate right
-                  ctx.rotate(0.5 * Math.PI);
-                  ctx.scale(1, -1);
-                  break;
-              case 6:
-                  // 90 rotate right
-                  ctx.rotate(0.5 * Math.PI);
-                  ctx.translate(0, -imgHeight);
-                  break;
-              case 7:
-                  // horizontal flip + 90 rotate right
-                  ctx.rotate(0.5 * Math.PI);
-                  ctx.translate(imgWidth, -imgHeight);
-                  ctx.scale(-1, 1);
-                  break;
-              case 8:
-                  // 90 rotate left
-                  ctx.rotate(-0.5 * Math.PI);
-                  ctx.translate(-imgWidth, 0);
-                  break;
-              default:
-                  break;
-            }
-          }
-
-          minLeft = (scope.width + 100) - this.width;
-          minTop = (scope.height + 100) - this.height;
-          newWidth = imgWidth;
-          newHeight = imgHeight;
-
-          // console.log('canvas width', $canvas.width);
-          // console.log('image width', imgWidth);
-
-          maxZoomedInLevel = ($canvas.width - 100) / imgWidth;
-          // console.log('maxZoomedInLevel', maxZoomedInLevel);
-
-          maxZoomGestureLength = to2Dp(Math.sqrt(Math.pow($canvas.width, 2) + Math.pow($canvas.height, 2)));
-          // console.log('maxZoomGestureLength', maxZoomGestureLength);
-
-
-          updateDragBounds();
-
-        };
-
-        // ---------- PRIVATE FUNCTIONS ---------- //
-        function moveImage(x, y) {
-
-          if ((x < minXPos) || (x > maxXPos) || (y < minYPos) || (y > maxYPos)) {
-            // new position is out of bounds, would show gutter
-            return;
-          }
-          targetX = x;
-          targetY = y;
-          ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-          ctx.drawImage($img, x, y, newWidth, newHeight);
-        }
-
-        function to2Dp(val) {
-          return Math.round(val * 1000) / 1000;
-        }
-
-        function updateDragBounds() {
-          // $img.width, $canvas.width, zoom
-
-          minXPos = $canvas.width - ($img.width * zoom) - 50;
-          minYPos = $canvas.height - ($img.height * zoom) - 50;
-
-        }
-
-        function zoomImage(val) {
-
-          if (!val) {
-            return;
-          }
-
-
-          var proposedZoomLevel = to2Dp(zoom + val);
-
-          if ((proposedZoomLevel < maxZoomedInLevel) || (proposedZoomLevel > maxZoomedOutLevel)) {
-            // image wont fill whole canvas
-            // or image is too far zoomed in, it's gonna get pretty pixelated!
-            return;
-          }
-
-          zoom = proposedZoomLevel;
-          // console.log('zoom', zoom);
-
-          updateDragBounds();
-
-          //  do image position adjustments so we don't see any gutter
-          if (proposedZoomLevel === maxZoomedInLevel) {
-            // image fills canvas perfectly, let's center it
+          function reset() {
+            files = [];
+            zoom = 1;
             ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-            ctx.drawImage($img, 0, 0, $canvas.width, $canvas.height);
-            return;
+            $input.value = null;
+            $img.src = '';
           }
 
-          newWidth = $img.width * zoom;
-          newHeight = $img.height * zoom;
+          element.on('change', function(e){
+            files = e.target.files;
+            fileReader.readAsDataURL(files[0]);
+           });
 
-          var newXPos = currentX * zoom;
-          var newYPos = currentY * zoom;
 
-          // check if we've exposed the gutter
-          if (newXPos < minXPos) {
-            newXPos = minXPos;
-          } else if (newXPos > maxXPos) {
-            newXPos = maxXPos;
+          $img.onload = function() {
+            ctx.drawImage($img, 0, 0);
+
+            imgWidth = $img.width;
+            imgHeight = $img.height;
+
+            if (exif && exif.Orientation) {
+
+              // change mobile orientation, if required
+              switch(exif.Orientation){
+                case 1:
+                    // nothing
+                    break;
+                case 2:
+                    // horizontal flip
+                    ctx.translate(imgWidth, 0);
+                    ctx.scale(-1, 1);
+                    break;
+                case 3:
+                    // 180 rotate left
+                    ctx.translate(imgWidth, imgHeight);
+                    ctx.rotate(Math.PI);
+                    break;
+                case 4:
+                    // vertical flip
+                    ctx.translate(0, imgHeight);
+                    ctx.scale(1, -1);
+                    break;
+                case 5:
+                    // vertical flip + 90 rotate right
+                    ctx.rotate(0.5 * Math.PI);
+                    ctx.scale(1, -1);
+                    break;
+                case 6:
+                    // 90 rotate right
+                    ctx.rotate(0.5 * Math.PI);
+                    ctx.translate(0, -imgHeight);
+                    break;
+                case 7:
+                    // horizontal flip + 90 rotate right
+                    ctx.rotate(0.5 * Math.PI);
+                    ctx.translate(imgWidth, -imgHeight);
+                    ctx.scale(-1, 1);
+                    break;
+                case 8:
+                    // 90 rotate left
+                    ctx.rotate(-0.5 * Math.PI);
+                    ctx.translate(-imgWidth, 0);
+                    break;
+                default:
+                    break;
+              }
+            }
+
+            minLeft = (scope.width + 100) - this.width;
+            minTop = (scope.height + 100) - this.height;
+            newWidth = imgWidth;
+            newHeight = imgHeight;
+
+            // console.log('canvas width', $canvas.width);
+            // console.log('image width', imgWidth);
+
+            maxZoomedInLevel = ($canvas.width - 100) / imgWidth;
+            // console.log('maxZoomedInLevel', maxZoomedInLevel);
+
+            maxZoomGestureLength = to2Dp(Math.sqrt(Math.pow($canvas.width, 2) + Math.pow($canvas.height, 2)));
+            // console.log('maxZoomGestureLength', maxZoomGestureLength);
+
+
+            updateDragBounds();
+
+          };
+
+          // ---------- PRIVATE FUNCTIONS ---------- //
+          function moveImage(x, y) {
+
+            if ((x < minXPos) || (x > maxXPos) || (y < minYPos) || (y > maxYPos)) {
+              // new position is out of bounds, would show gutter
+              return;
+            }
+            targetX = x;
+            targetY = y;
+            ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+            ctx.drawImage($img, x, y, newWidth, newHeight);
           }
 
-          if (newYPos < minYPos) {
-            newYPos = minYPos;
-          } else if (newYPos > maxYPos) {
-            newYPos = maxYPos;
+          function to2Dp(val) {
+            return Math.round(val * 1000) / 1000;
           }
 
-          // check if image is still going to fit the bounds of the box
-          ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-          ctx.drawImage($img, newXPos, newYPos, newWidth, newHeight);
+          function updateDragBounds() {
+            // $img.width, $canvas.width, zoom
+
+            minXPos = $canvas.width - ($img.width * zoom) - 50;
+            minYPos = $canvas.height - ($img.height * zoom) - 50;
+
+          }
+
+          function zoomImage(val) {
+
+            if (!val) {
+              return;
+            }
+
+
+            var proposedZoomLevel = to2Dp(zoom + val);
+
+            if ((proposedZoomLevel < maxZoomedInLevel) || (proposedZoomLevel > maxZoomedOutLevel)) {
+              // image wont fill whole canvas
+              // or image is too far zoomed in, it's gonna get pretty pixelated!
+              return;
+            }
+
+            zoom = proposedZoomLevel;
+            // console.log('zoom', zoom);
+
+            updateDragBounds();
+
+            //  do image position adjustments so we don't see any gutter
+            if (proposedZoomLevel === maxZoomedInLevel) {
+              // image fills canvas perfectly, let's center it
+              ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+              ctx.drawImage($img, 0, 0, $canvas.width, $canvas.height);
+              return;
+            }
+
+            newWidth = $img.width * zoom;
+            newHeight = $img.height * zoom;
+
+            var newXPos = currentX * zoom;
+            var newYPos = currentY * zoom;
+
+            // check if we've exposed the gutter
+            if (newXPos < minXPos) {
+              newXPos = minXPos;
+            } else if (newXPos > maxXPos) {
+              newXPos = maxXPos;
+            }
+
+            if (newYPos < minYPos) {
+              newYPos = minYPos;
+            } else if (newYPos > maxYPos) {
+              newYPos = maxYPos;
+            }
+
+            // check if image is still going to fit the bounds of the box
+            ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+            ctx.drawImage($img, newXPos, newYPos, newWidth, newHeight);
+          }
+
+          function calcZoomLevel(diffX, diffY) {
+
+            var hyp = Math.sqrt( Math.pow(diffX, 2) + Math.pow(diffY, 2) );
+            var zoomGestureRatio = to2Dp(hyp / maxZoomGestureLength);
+            var newZoomDiff = to2Dp((maxZoomedOutLevel - maxZoomedInLevel) * zoomGestureRatio * zoomWeight);
+            return diffX > 0 ? -newZoomDiff : newZoomDiff;
+          }
+
+          // ---------- SCOPE FUNCTIONS ---------- //
+
+          $finalImg.onload = function() {
+            var tempCanvas = document.createElement('canvas');
+            tempCanvas.width = this.width - 100;
+            tempCanvas.height = this.height - 100;
+            tempCanvas.style.display = 'none';
+
+            var tempCanvasContext = tempCanvas.getContext('2d');
+            tempCanvasContext.drawImage($finalImg, -50, -50);
+
+            $elm.getElementsByClassName('image-crop-section-final')[0].appendChild(tempCanvas);
+            scope.result = tempCanvas.toDataURL();
+            scope.$apply();
+
+            reset();
+
+          };
+
+          scope.crop = function() {
+            scope.croppedDataUri = $canvas.toDataURL();
+            scope.step = 3;
+          };
+
+          scope.onCanvasMouseUp = function(e) {
+
+            if (!dragging) {
+              return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation(); // if event was on canvas, stop it propagating up
+
+            startX = 0;
+            startY = 0;
+            dragging = false;
+            currentX = targetX;
+            currentY = targetY;
+
+            removeBodyEventListener('mouseup', scope.onCanvasMouseUp);
+            removeBodyEventListener('touchend', scope.onCanvasMouseUp);
+            removeBodyEventListener('mousemove', scope.onCanvasMouseMove);
+            removeBodyEventListener('touchmove', scope.onCanvasMouseMove);
+          };
+
+          $canvas.addEventListener('touchend', scope.onCanvasMouseUp, false);
+
+          scope.onCanvasMouseDown = function(e) {
+            startX = e.type === 'touchstart' ? e.changedTouches[0].clientX : e.clientX;
+            startY = e.type === 'touchstart' ? e.changedTouches[0].clientY : e.clientY;
+            zooming = false;
+            dragging = true;
+
+            addBodyEventListener('mouseup', scope.onCanvasMouseUp);
+            addBodyEventListener('mousemove', scope.onCanvasMouseMove);
+          };
+
+          $canvas.addEventListener('touchstart', scope.onCanvasMouseDown, false);
+
+          function addBodyEventListener(eventName, func) {
+            document.documentElement.addEventListener(eventName, func, false);
+          }
+
+          function removeBodyEventListener(eventName, func) {
+            document.documentElement.removeEventListener(eventName, func);
+          }
+
+          scope.onHandleMouseDown = function(e) {
+
+            e.preventDefault();
+            e.stopPropagation(); // if event was on handle, stop it propagating up
+
+            startX = lastHandleX = (e.type === 'touchstart') ? e.changedTouches[0].clientX : e.clientX;
+            startY = lastHandleY = (e.type === 'touchstart') ? e.changedTouches[0].clientY : e.clientY;
+            dragging = false;
+            zooming = true;
+
+            addBodyEventListener('mouseup', scope.onHandleMouseUp);
+            addBodyEventListener('touchend', scope.onHandleMouseUp);
+            addBodyEventListener('mousemove', scope.onHandleMouseMove);
+            addBodyEventListener('touchmove', scope.onHandleMouseMove);
+          };
+
+          $handle.addEventListener('touchstart', scope.onHandleMouseDown, false);
+
+          scope.onHandleMouseUp = function(e) {
+
+            // this is applied on the whole section so check we're zooming
+            if (!zooming) {
+              return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation(); // if event was on canvas, stop it propagating up
+
+            startX = 0;
+            startY = 0;
+            zooming = false;
+            currentX = targetX;
+            currentY = targetY;
+
+            removeBodyEventListener('mouseup', scope.onHandleMouseUp);
+            removeBodyEventListener('touchend', scope.onHandleMouseUp);
+            removeBodyEventListener('mousemove', scope.onHandleMouseMove);
+            removeBodyEventListener('touchmove', scope.onHandleMouseMove);
+          };
+
+          $handle.addEventListener('touchend', scope.onHandleMouseUp, false);
+
+
+          scope.onCanvasMouseMove = function(e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!dragging) {
+              return;
+            }
+
+
+
+            var diffX = startX - ((e.type === 'touchmove') ? e.changedTouches[0].clientX : e.clientX); // how far mouse has moved in current drag
+            var diffY = startY - ((e.type === 'touchmove') ? e.changedTouches[0].clientY : e.clientY); // how far mouse has moved in current drag
+            /*targetX = currentX - diffX; // desired new X position
+            targetY = currentY - diffY; // desired new X position*/
+
+            moveImage(currentX - diffX, currentY - diffY);
+
+          };
+
+          $canvas.addEventListener('touchmove', scope.onCanvasMouseMove, false);
+
+
+          var lastHandleX = null, lastHandleY = null;
+
+          scope.onHandleMouseMove = function(e) {
+
+            e.stopPropagation();
+            e.preventDefault();
+
+            // this is applied on the whole section so check we're zooming
+            if (!zooming) {
+              return false;
+            }
+
+            var diffX = lastHandleX - ((e.type === 'touchmove') ? e.changedTouches[0].clientX : e.clientX); // how far mouse has moved in current drag
+            var diffY = lastHandleY - ((e.type === 'touchmove') ? e.changedTouches[0].clientY : e.clientY); // how far mouse has moved in current drag
+
+            lastHandleX = (e.type === 'touchmove') ? e.changedTouches[0].clientX : e.clientX;
+            lastHandleY = (e.type === 'touchmove') ? e.changedTouches[0].clientY : e.clientY;
+
+            var zoomVal = calcZoomLevel(diffX, diffY);
+            zoomImage(zoomVal);
+
+          };
+
+          $handle.addEventListener('touchmove', scope.onHandleMouseMove, false);
+
         }
-
-        function calcZoomLevel(diffX, diffY) {
-
-          var hyp = Math.sqrt( Math.pow(diffX, 2) + Math.pow(diffY, 2) );
-          var zoomGestureRatio = to2Dp(hyp / maxZoomGestureLength);
-          var newZoomDiff = to2Dp((maxZoomedOutLevel - maxZoomedInLevel) * zoomGestureRatio * zoomWeight);
-          return diffX > 0 ? -newZoomDiff : newZoomDiff;
-        }
-
-        // ---------- SCOPE FUNCTIONS ---------- //
-
-        $finalImg.onload = function() {
-          var tempCanvas = document.createElement('canvas');
-          tempCanvas.width = this.width - 100;
-          tempCanvas.height = this.height - 100;
-          tempCanvas.style.display = 'none';
-          // console.log('tempCanvas.width', tempCanvas.width, tempCanvas.height);
-
-          var tempCanvasContext = tempCanvas.getContext('2d');
-          // console.log('tempCanvasContext', tempCanvasContext);
-          tempCanvasContext.drawImage($finalImg, -50, -50);
-
-          document.getElementsByClassName('section-final')[0].appendChild(tempCanvas);
-          scope.result = tempCanvas.toDataURL();
-          scope.$apply();
-
-          reset();
-
-        };
-
-        scope.crop = function() {
-          scope.croppedDataUri = $canvas.toDataURL();
-          scope.step = 3;
-        };
-
-        scope.onCanvasMouseUp = function(e) {
-
-          if (!dragging) {
-            return;
-          }
-
-          e.preventDefault();
-          e.stopPropagation(); // if event was on canvas, stop it propagating up
-
-          startX = 0;
-          startY = 0;
-          dragging = false;
-          currentX = targetX;
-          currentY = targetY;
-
-          removeBodyEventListener('mouseup', scope.onCanvasMouseUp);
-          removeBodyEventListener('touchend', scope.onCanvasMouseUp);
-          removeBodyEventListener('mousemove', scope.onCanvasMouseMove);
-          removeBodyEventListener('touchmove', scope.onCanvasMouseMove);
-        };
-
-        $canvas.addEventListener('touchend', scope.onCanvasMouseUp, false);
-
-        scope.onCanvasMouseDown = function(e) {
-          startX = e.type === 'touchstart' ? e.changedTouches[0].clientX : e.clientX;
-          startY = e.type === 'touchstart' ? e.changedTouches[0].clientY : e.clientY;
-          zooming = false;
-          dragging = true;
-
-          addBodyEventListener('mouseup', scope.onCanvasMouseUp);
-          addBodyEventListener('mousemove', scope.onCanvasMouseMove);
-        };
-
-        $canvas.addEventListener('touchstart', scope.onCanvasMouseDown, false);
-
-        function addBodyEventListener(eventName, func) {
-          document.documentElement.addEventListener(eventName, func, false);
-        }
-
-        function removeBodyEventListener(eventName, func) {
-          document.documentElement.removeEventListener(eventName, func);
-        }
-
-        scope.onHandleMouseDown = function(e) {
-
-          e.preventDefault();
-          e.stopPropagation(); // if event was on handle, stop it propagating up
-
-          startX = lastHandleX = (e.type === 'touchstart') ? e.changedTouches[0].clientX : e.clientX;
-          startY = lastHandleY = (e.type === 'touchstart') ? e.changedTouches[0].clientY : e.clientY;
-          dragging = false;
-          zooming = true;
-
-          addBodyEventListener('mouseup', scope.onHandleMouseUp);
-          addBodyEventListener('touchend', scope.onHandleMouseUp);
-          addBodyEventListener('mousemove', scope.onHandleMouseMove);
-          addBodyEventListener('touchmove', scope.onHandleMouseMove);
-        };
-
-        $handle.addEventListener('touchstart', scope.onHandleMouseDown, false);
-
-        scope.onHandleMouseUp = function(e) {
-
-          // this is applied on the whole section so check we're zooming
-          if (!zooming) {
-            return;
-          }
-
-          e.preventDefault();
-          e.stopPropagation(); // if event was on canvas, stop it propagating up
-
-          startX = 0;
-          startY = 0;
-          zooming = false;
-          currentX = targetX;
-          currentY = targetY;
-
-          removeBodyEventListener('mouseup', scope.onHandleMouseUp);
-          removeBodyEventListener('touchend', scope.onHandleMouseUp);
-          removeBodyEventListener('mousemove', scope.onHandleMouseMove);
-          removeBodyEventListener('touchmove', scope.onHandleMouseMove);
-        };
-
-        $handle.addEventListener('touchend', scope.onHandleMouseUp, false);
-
-
-        scope.onCanvasMouseMove = function(e) {
-
-          e.preventDefault();
-          e.stopPropagation();
-
-          if (!dragging) {
-            return;
-          }
-
-
-
-          var diffX = startX - ((e.type === 'touchmove') ? e.changedTouches[0].clientX : e.clientX); // how far mouse has moved in current drag
-          var diffY = startY - ((e.type === 'touchmove') ? e.changedTouches[0].clientY : e.clientY); // how far mouse has moved in current drag
-          /*targetX = currentX - diffX; // desired new X position
-          targetY = currentY - diffY; // desired new X position*/
-
-          moveImage(currentX - diffX, currentY - diffY);
-
-        };
-
-        $canvas.addEventListener('touchmove', scope.onCanvasMouseMove, false);
-
-
-        var lastHandleX = null, lastHandleY = null;
-
-        scope.onHandleMouseMove = function(e) {
-
-          e.stopPropagation();
-          e.preventDefault();
-
-          // this is applied on the whole section so check we're zooming
-          if (!zooming) {
-            return false;
-          }
-
-          var diffX = lastHandleX - ((e.type === 'touchmove') ? e.changedTouches[0].clientX : e.clientX); // how far mouse has moved in current drag
-          var diffY = lastHandleY - ((e.type === 'touchmove') ? e.changedTouches[0].clientY : e.clientY); // how far mouse has moved in current drag
-
-          lastHandleX = (e.type === 'touchmove') ? e.changedTouches[0].clientX : e.clientX;
-          lastHandleY = (e.type === 'touchmove') ? e.changedTouches[0].clientY : e.clientY;
-
-          var zoomVal = calcZoomLevel(diffX, diffY);
-          zoomImage(zoomVal);
-
-        };
-
-        $handle.addEventListener('touchmove', scope.onHandleMouseMove, false);
-
-      }
-    };
-  });
+      };
+    });
 
 
 })();

@@ -1,0 +1,119 @@
+<!doctype html>
+<html ng-app="myApp">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Test</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+  <!-- REQUIRED 1/3 - AngularJS Core -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.11/angular.min.js"></script>
+  <!-- REQUIRED 2/3 - styles for the image crop component -->
+  <link rel="stylesheet" href="image-crop-styles.css">
+  <script>
+    var myApp = null;
+    (function() {
+
+      angular.module('myApp', ['ImageCropper'])
+        .controller('MainController', function($scope) {
+          console.log('MainController');
+
+          $scope.imageCropResult = null;
+          $scope.imageCropResult2 = null;
+
+          $scope.showImageCropper = false;
+          $scope.showImageCropper2 = false;
+
+          $scope.$watch('imageCropResult', function(newVal) {
+            if (newVal) {
+              console.log('imageCropResult', newVal);
+            }
+          });
+
+          $scope.$watch('imageCropResult2', function(newVal) {
+            if (newVal) {
+              console.log('imageCropResult2', newVal);
+            }
+          });
+
+        });
+
+    })();
+  </script>
+  <!-- REQUIRED 3/3 - the image crop directive -->
+  <script src="image-crop.js"></script>
+  <style>
+    /* Styles for this demo page */
+    body {
+      font-size: 12px;
+      font-family: Helvetica, Arial;
+      background: white;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    a {
+      text-decoration: underline;
+      color: blue;
+      cursor: pointer;
+    }
+    hr {
+      border: none;
+      height: 1px;
+      width: 80%;
+      background: rgba(0,0,0,.3);
+      margin: 40px auto;
+    }
+    .result-datauri {
+      width: 300px;
+      height: 100px;
+      font-size: 11px;
+      line-height: 15px;
+      padding: 5px;
+      border: 1px solid black;
+      clear: both;
+      display: block;
+      margin: 20px auto;
+    }
+  </style>
+  <body>
+     <div ng-controller="MainController">
+      <h2>Angular Image Cropper (Multiple Instances)</h2>
+      <p>An AngularJS Directive by <a href="https://twitter.com/andyshora">@andyshora</a></p>
+      <hr>
+      <p ng-hide="imageCropResult||imageCropStep!=1">Let's get started &rarr; <a ng-click="showImageCropper=true;imageCropStep=1">Crop Image</a></p>
+      <p ng-show="imageCropResult">Wanna start over? &rarr; <a ng-click="imageCropResult=null;imageCropStep=1">Reset</a></p>
+       <image-crop
+         data-width="300"
+         data-height="300"
+         data-shape="circle"
+         data-step="imageCropStep"
+         data-result="imageCropResult"
+         ng-show="showImageCropper"
+       ></image-crop>
+       <p ng-hide="imageCropResult2||imageCropStep2!=1">Let's get started &rarr; <a ng-click="showImageCropper2=true;imageCropStep2=1">Crop Image</a></p>
+      <p ng-show="imageCropResult2">Wanna start over? &rarr; <a ng-click="imageCropResult2=null;imageCropStep2=1">Reset</a></p>
+       <image-crop
+         data-width="100"
+         data-height="100"
+         data-shape="square"
+         data-step="imageCropStep2"
+         data-result="imageCropResult2"
+         ng-show="showImageCropper2"
+       ></image-crop>
+       <p>* Note that the last 2 parameters shown must exist as variables in the scope of the controller.</p>
+
+       <hr>
+       <h2>Result</h2>
+       <div ng-show="imageCropResult">
+         <img ng-src="{{ imageCropResult }}" alt="The Cropped Image">
+         <img ng-src="{{ imageCropResult2 }}" alt="The Cropped Image">
+         <p>And this is the actual data uri which represents the cropped image, which you'll then upload to your server:</p>
+         <textarea class="result-datauri">{{ imageCropResult }}</textarea>
+         <textarea class="result-datauri">{{ imageCropResult2 }}</textarea>
+       </div>
+
+       <p ng-hide="imageCropResult">Not cropped yet</p>
+       <p ng-hide="imageCropResult2">Not cropped yet</p>
+     </div>
+  </body>
+</html>
