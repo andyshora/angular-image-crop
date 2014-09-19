@@ -6,7 +6,10 @@
     "Andy Shora <andyshora@gmail.com>"
   ],
   "description": "A better way to crop images client-side using AngularJS",
-  "main": "image-crop.js",
+  "main": [
+    "image-crop.js",
+    "image-crop-styles.css"
+  ],
   "keywords": [
     "angular",
     "angularjs",
