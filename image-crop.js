@@ -771,8 +771,8 @@
           height: '@',
           shape: '@',
 		  src: '=',
-          result: '=',
-		  resultUrl: '=',
+          resultBlob: '=',
+		  result: '=',
           step: '=',
           padding: '@',
 		  maxSize: '@'
@@ -998,7 +998,7 @@
           // ---------- EVENT HANDLERS ---------- //
           fileReader.onload = function(e) {
           	
-          	loadImage(this.result);	
+          	loadImage(this.resultBlob);	
 
           };	  
 
@@ -1185,8 +1185,8 @@
 			
 			var dataUrl = tempCanvas.toDataURL();
 			
-			scope.resultUrl = dataUrl;
-            scope.result = dataURItoBlob(dataUrl);
+			scope.result = dataUrl;
+            scope.resultBlob = dataURItoBlob(dataUrl);
             
             scope.$apply();
           };

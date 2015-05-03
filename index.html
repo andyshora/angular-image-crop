@@ -41,7 +41,7 @@
 			 $scope.imageCropStep = 1;
 			 delete $scope.imgSrc;
 			 delete $scope.result;
-			 delete $scope.resultDataUrl;
+			 delete $scope.resultBlob;
 		};
 		
 	}]);
@@ -102,8 +102,8 @@
 			 data-shape="square" //the shape.. square or circle
 			 data-step="imageCropStep"//scope variable that will contain the current step of the crop (1. Waiting for source image; 2. Image loaded, waiting for crop; 3. Crop done)
 			 src="imgSrc" //scope variable that will be the source image for the crop (may be a Blob or base64 string)
-			 data-result="result" //scope variable that will contain the Blob information
-			 data-result-url="resultDataUrl" //scope variable that will contain the image's base64 string representation
+			 data-result-blob="result" //scope variable that will contain the Blob information
+			 data-result="resultDataUrl" //scope variable that will contain the image's base64 string representation
 			 crop="initCrop" //scope variable that must be set to true when the image is ready to be cropped
 			 padding="250" //space, in pixels, rounding the shape
 			 max-size="1024" //max of the image, in pixels
@@ -116,7 +116,7 @@
 			 data-step="imageCropStep"
 			 src="imgSrc"
 			 data-result="result"
-			 data-result-url="resultDataUrl"
+			 data-result-blob="resultBlob"
 			 crop="initCrop"
 			 padding="250"
 			 max-size="1024"
@@ -133,11 +133,11 @@
 	   
 	     <h2>Result</h2>
        
-		 <p>The data-result property is a Blob object, which is necessary in some upload libraries like <a href="https://github.com/nervgh/angular-file-upload" target="_blank">Angular File Upload</a></p>
+		 <p>The data-result-blob property is a Blob object, which is necessary in some upload libraries like <a href="https://github.com/nervgh/angular-file-upload" target="_blank">Angular File Upload</a></p>
 		 <p>Image using the data uri:</p>
-		 <img ng-src="{{resultDataUrl}}"></img>
+		 <img ng-src="{{result}}"></img>
          <p>The Base64 String used in the image above:</p>         
-         <textarea class="result-datauri">{{ resultDataUrl }}</textarea>
+         <textarea class="result-datauri">{{ result }}</textarea>
 		 <button ng-click="clear()">Clear</button>	
        
 	  </div>
