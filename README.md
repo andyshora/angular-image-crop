@@ -48,8 +48,6 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
  max-size="1024"
 ></image-crop>	
 ```
-Note that the last 2 parameters shown must exist as variables in the scope of the controller.
-
 
 # See a standalone working example
 [Working example on JSBin](http://jsbin.com/fovovu/1/edit?javascript,output)
