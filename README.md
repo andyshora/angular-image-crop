@@ -24,14 +24,14 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 
 * width (string) - the width of the cropper
 * height (string) - the height of the cropper
+* padding (integer) - space, in pixels, rounding the shape
+* max-size (integer) - max size of the image, in pixels
 * shape (string) - the cropping guideline shape (circle/square)
 * step (bound integer) - the variable which dictates which step the user will see (used for resetting purposes)
-* src (bound Blob or base64 string) - //scope variable that will be the source image for the crop
+* src (bound Blob or base64 string) - scope variable that will be the source image for the crop
 * result (bound string) - the variable which will have the resulting data uri bound to it
-* result-blob (bound blob) - the variable which will have the resulting data as a Blob object
+* result-blob (bound Blob) - the variable which will have the resulting data as a Blob object
 * crop (bound boolean) - scope variable that must be set to true when the image is ready to be cropped
-* padding (bound integer) - space, in pixels, rounding the shape
-* max-size (bound integer) - max size of the image, in pixels
 
 ### Example markup
 ```html
@@ -42,6 +42,7 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
  data-step="imageCropStep"
  src="imgSrc"
  data-result="result"
+ data-result-blob="resultBlob"
  crop="initCrop"
  padding="250"
  max-size="1024"
