@@ -24,22 +24,30 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 
 * width (string) - the width of the cropper
 * height (string) - the height of the cropper
+* padding (integer) - space, in pixels, rounding the shape
+* max-size (integer) - max size of the image, in pixels
 * shape (string) - the cropping guideline shape (circle/square)
-* result (bound string) - the variable which will have the resulting data uri bound to it
 * step (bound integer) - the variable which dictates which step the user will see (used for resetting purposes)
+* src (bound Blob or base64 string) - scope variable that will be the source image for the crop
+* result (bound string) - the variable which will have the resulting data uri bound to it
+* result-blob (bound Blob) - the variable which will have the resulting data as a Blob object
+* crop (bound boolean) - scope variable that must be set to true when the image is ready to be cropped
 
 ### Example markup
 ```html
-<image-crop
- data-width="300"
- data-height="300"
- data-shape="circle"
- data-result="imageCropResult"
+<image-crop			 
+ data-height="200"
+ data-width="150"
+ data-shape="square"
  data-step="imageCropStep"
-></image-crop>
+ src="imgSrc"
+ data-result="result"
+ data-result-blob="resultBlob"
+ crop="initCrop"
+ padding="250"
+ max-size="1024"
+></image-crop>	
 ```
-Note that the last 2 parameters shown must exist as variables in the scope of the controller.
-
 
 # See a standalone working example
 [Working example on JSBin](http://jsbin.com/fovovu/1/edit?javascript,output)
@@ -51,11 +59,3 @@ Note that the last 2 parameters shown must exist as variables in the scope of th
 ## Step 2. Produces a result as a base64-encoded data uri
 
 ![Choose image](https://s3-eu-west-1.amazonaws.com/andyshora/crop-step-2.png)
-
-# Known Issues
-
-1. Currently not working with images captured on some mobile devices, due to orientation exif data being used mobile browsers. Other images on mobiles, including downloaded images are working fine.
-
-# Updates
-
-- Now works with multiple instances

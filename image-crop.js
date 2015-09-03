@@ -762,30 +762,36 @@
     .directive('imageCrop', function() {
 
       return {
-        template: '<div id="image-crop-{{ rand }}" class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"><input type="file" class="image-crop-input" /></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ canvasWidth }}" height="{{ canvasHeight }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)" ng-mouseup="onCanvasMouseUp($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div><button ng-click="crop()">Crop</button></section><section ng-style="sectionStyles" class="image-crop-section-final" ng-show="step==3"><img class="image-crop-final" ng-src="{{ croppedDataUri }}" /></section></div>',
+        template: '<div id="image-crop-{{ rand }}" class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ canvasWidth }}" height="{{ canvasHeight }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div></section><section ng-style="sectionStyles" class="image-crop-section-final" ng-show="step==3"><img class="image-crop-final" ng-src="{{ croppedDataUri }}" /></section></div>',
         replace: true,
         restrict: 'AE',
         scope: {
+		  crop: '=',
           width: '@',
           height: '@',
           shape: '@',
-          result: '=',
-          step: '='
+		  src: '=',
+          resultBlob: '=',
+		  result: '=',
+          step: '=',
+          padding: '@',
+		  maxSize: '@'
         },
         link: function (scope, element, attributes) {
-
+		  
+		  var padding = scope.padding ? Number(scope.padding) : 200;
+		  
           scope.rand = Math.round(Math.random() * 99999);
           scope.step = scope.step || 1;
           scope.shape = scope.shape || 'circle';
           scope.width = parseInt(scope.width, 10) || 300;
           scope.height = parseInt(scope.height, 10) || 300;
 
-          scope.canvasWidth = scope.width + 100;
-          scope.canvasHeight = scope.height + 100;
+          scope.canvasWidth = scope.width + padding;
+          scope.canvasHeight = scope.height + padding;
 
           var $elm = element[0];
 
-          var $input = $elm.getElementsByClassName('image-crop-input')[0];
           var $canvas = $elm.getElementsByClassName('cropping-canvas')[0];
           var $handle = $elm.getElementsByClassName('zoom-handle')[0];
           var $finalImg = $elm.getElementsByClassName('image-crop-final')[0];
@@ -799,141 +805,263 @@
           var zoom = 1;
           var maxZoomGestureLength = 0;
           var maxZoomedInLevel = 0, maxZoomedOutLevel = 2;
-          var minXPos = 0, maxXPos = 50, minYPos = 0, maxYPos = 50; // for dragging bounds
-
-          var zoomWeight = .4;
+          var minXPos = 0, maxXPos = (padding/2), minYPos = 0, maxYPos = (padding/2); // for dragging bounds		  
+		  var maxSize = scope.maxSize ? Number(scope.maxSize) : null; //max size of the image in px
+		  
+          var zoomWeight = .6;
           var ctx = $canvas.getContext('2d');
           var exif = null;
           var files = [];
 
           // ---------- INLINE STYLES ----------- //
           scope.moduleStyles = {
-            width: (scope.width + 100) + 'px',
-            height: (scope.height + 100) + 'px'
+            width: (scope.width + padding) + 'px',
+            height: (scope.height + padding) + 'px'
           };
 
           scope.sectionStyles = {
-            width: (scope.width + 100) + 'px',
-            height: (scope.height + 100) + 'px'
+            width: (scope.width + padding) + 'px',
+            height: (scope.height + padding) + 'px'
           };
 
           scope.croppingGuideStyles = {
             width: scope.width + 'px',
             height: scope.height + 'px',
-            top: '50px',
-            left: '50px'
+            top: (padding/2)+'px',
+            left: (padding/2)+'px'
           };
+  		  
+		  function handleSize(base64ImageSrc) {
+		  
+			return new Promise(function(resolve, reject) {
+				
+				if(!maxSize) {
+					return resolve(base64ImageSrc);
+				}
+				
+				var img = new Image();
+				img.src = base64ImageSrc;
+				
+				img.onload = function() {
+				
+					var height = img.height;
+					var width = img.width;
+															
+					//if the size is already ok, just return the image
+					if(height <= maxSize && width <= maxSize) {						
+						return resolve(base64ImageSrc);
+					}			 	
+					
+					var ratio = width/height;
+					
+					if(ratio > 1) {
+						width = maxSize;
+						height = maxSize/ratio;
+					}
+					else {
+						width = maxSize*ratio;
+						height = maxSize;
+					}							
+					
+					width = Math.round(width);
+					height = Math.round(height);			 	
+					
+					var canvas = document.createElement("canvas");
+					canvas.width = width;
+					canvas.height = height;			 	
+					
+					var context = canvas.getContext("2d");
+									
+					context.drawImage(img, 0, 0, img.width,    img.height,      // source
+										   0, 0, canvas.width, canvas.height);  // destination	 
+					
+					context.save();
+								
+					var dataUrl = canvas.toDataURL();
+					
+					resolve(dataUrl);
 
+				};
+					
+			});		  
+				
+		  }
+					
+		  function handleEXIF(base64ImageSrc, exif) {
+		  		
+			return new Promise(function(resolve, reject) {
+								
+				var img = new Image();
+				img.src = base64ImageSrc;
+				
+				img.onload = function() {
+				
+					var canvas = document.createElement("canvas");
+					
+					if(exif.Orientation >= 5) {
+						canvas.width = img.height;
+						canvas.height = img.width;
+					} else {
+						canvas.width = img.width;
+						canvas.height = img.height;
+					}
+					
+					var context = canvas.getContext("2d");
+		
+					// change mobile orientation, if required
+					switch(exif.Orientation){
+						case 1:
+							// nothing
+							break;
+						case 2:
+							// horizontal flip
+							context.translate(img.width, 0);
+							context.scale(-1, 1);
+							break;
+						case 3:
+							// 180 rotate left
+							context.translate(img.width, img.height);
+							context.rotate(Math.PI);
+							break;
+						case 4:
+							// vertical flip
+							context.translate(0, img.height);
+							context.scale(1, -1);
+							break;
+						case 5:
+							// vertical flip + 90 rotate right
+							context.rotate(0.5 * Math.PI);
+							context.scale(1, -1);
+							break;
+						case 6:
+							// 90 rotate right
+							context.rotate(0.5 * Math.PI);
+							context.translate(0, -img.height);
+							break;
+						case 7:
+							// horizontal flip + 90 rotate right
+							context.rotate(0.5 * Math.PI);
+							context.translate(img.width, -img.height);
+							context.scale(-1, 1);
+							break;
+						case 8:
+							// 90 rotate left					 		                   
+							context.rotate(-0.5 * Math.PI);
+							context.translate(-img.width, 0);
+							break;
+						default:
+							break;
+					}
+					
+					context.drawImage(img, 0, 0);	
+					context.save();
+					
+					var dataUrl = canvas.toDataURL();
+					
+					resolve(dataUrl);										
+				
+				};
+				
+			});				
+				
+		  }
+		  
+		  function loadImage(base64ImageSrc) {
+		  
+			//get the EXIF information from the image
+            var byteString = atob(base64ImageSrc.split(',')[1]);
+            var binary = new BinaryFile(byteString, 0, byteString.length);
+            exif = EXIF.readFromBinaryFile(binary);		  
+           
+		    //handle image size
+            handleSize(base64ImageSrc).then(function(base64ImageSrc) {
+			
+				//if the image has EXIF orientation..
+				if (exif && exif.Orientation && exif.Orientation > 1) {			
+					return handleEXIF(base64ImageSrc, exif);
+				} 
+				//otherwise, just return the image without any treatment
+				else {
+					return base64ImageSrc;
+				}
+				
+			}).then(function(base64ImageSrc) {
+			
+				$img.src = base64ImageSrc;
+				
+			}).catch(function(error) {							
+				console.log(error);				
+			});    
+			
+		  };
+		  
           // ---------- EVENT HANDLERS ---------- //
           fileReader.onload = function(e) {
-            $img.src = this.result;
-            scope.step = 2;
-            scope.$apply();
+          	
+          	loadImage(this.resultBlob);	
 
-            var byteString = atob(this.result.split(',')[1]);
-            var binary = new BinaryFile(byteString, 0, byteString.length);
-            exif = EXIF.readFromBinaryFile(binary);
-
-          };
-
-          function reset() {
-            files = [];
-            zoom = 1;
-            ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-            $input.value = null;
-            $img.src = '';
-          }
-
-          element.on('change', function(e){
-            files = e.target.files;
-            fileReader.readAsDataURL(files[0]);
-           });
-
+          };	  
 
           $img.onload = function() {
+		  
+			scope.step = 2;
+			scope.$apply();		  
+			
             ctx.drawImage($img, 0, 0);
 
             imgWidth = $img.width;
             imgHeight = $img.height;
 
-            if (exif && exif.Orientation) {
-
-              // change mobile orientation, if required
-              switch(exif.Orientation){
-                case 1:
-                    // nothing
-                    break;
-                case 2:
-                    // horizontal flip
-                    ctx.translate(imgWidth, 0);
-                    ctx.scale(-1, 1);
-                    break;
-                case 3:
-                    // 180 rotate left
-                    ctx.translate(imgWidth, imgHeight);
-                    ctx.rotate(Math.PI);
-                    break;
-                case 4:
-                    // vertical flip
-                    ctx.translate(0, imgHeight);
-                    ctx.scale(1, -1);
-                    break;
-                case 5:
-                    // vertical flip + 90 rotate right
-                    ctx.rotate(0.5 * Math.PI);
-                    ctx.scale(1, -1);
-                    break;
-                case 6:
-                    // 90 rotate right
-                    ctx.rotate(0.5 * Math.PI);
-                    ctx.translate(0, -imgHeight);
-                    break;
-                case 7:
-                    // horizontal flip + 90 rotate right
-                    ctx.rotate(0.5 * Math.PI);
-                    ctx.translate(imgWidth, -imgHeight);
-                    ctx.scale(-1, 1);
-                    break;
-                case 8:
-                    // 90 rotate left
-                    ctx.rotate(-0.5 * Math.PI);
-                    ctx.translate(-imgWidth, 0);
-                    break;
-                default:
-                    break;
-              }
-            }
-
-            minLeft = (scope.width + 100) - this.width;
-            minTop = (scope.height + 100) - this.height;
+            minLeft = (scope.width + padding) - this.width;
+            minTop = (scope.height + padding) - this.height;
             newWidth = imgWidth;
             newHeight = imgHeight;
-
-            // console.log('canvas width', $canvas.width);
-            // console.log('image width', imgWidth);
-
-            maxZoomedInLevel = ($canvas.width - 100) / imgWidth;
-            // console.log('maxZoomedInLevel', maxZoomedInLevel);
+            
+			if(imgWidth >= imgHeight) {
+				maxZoomedInLevel = ($canvas.height - padding) / imgHeight;
+			} else {
+				maxZoomedInLevel = ($canvas.width - padding) / imgWidth;
+			}		
 
             maxZoomGestureLength = to2Dp(Math.sqrt(Math.pow($canvas.width, 2) + Math.pow($canvas.height, 2)));
-            // console.log('maxZoomGestureLength', maxZoomGestureLength);
-
 
             updateDragBounds();
-
+			
+			var initialX = Math.round((minXPos + maxXPos)/2);
+			var initialY = Math.round((minYPos + maxYPos)/2);
+						
+			moveImage(initialX, initialY);
+			
           };
+		  
+          function reset() {
+            files = [];
+            zoom = 1;
+			currentX = 0; 
+			currentY = 0; 
+			dragging = false; 
+			startX = 0; 
+			startY = 0; 
+			zooming = false;
+            ctx.clearRect(0, 0, $canvas.width, $canvas.height);            
+            $img.src = '';
+          }		  
 
           // ---------- PRIVATE FUNCTIONS ---------- //
           function moveImage(x, y) {
+			
+			x = x < minXPos ? minXPos : x;
+			x = x > maxXPos ? maxXPos : x;
+			y = y < minYPos ? minYPos : y;
+			y = y > maxYPos ? maxYPos : y;			
 
-            if ((x < minXPos) || (x > maxXPos) || (y < minYPos) || (y > maxYPos)) {
-              // new position is out of bounds, would show gutter
-              return;
-            }
             targetX = x;
             targetY = y;
+			
             ctx.clearRect(0, 0, $canvas.width, $canvas.height);
             ctx.drawImage($img, x, y, newWidth, newHeight);
+			
+			return x == minXPos || x == maxXPos || y == minYPos || y == maxYPos;
           }
 
           function to2Dp(val) {
@@ -943,8 +1071,8 @@
           function updateDragBounds() {
             // $img.width, $canvas.width, zoom
 
-            minXPos = $canvas.width - ($img.width * zoom) - 50;
-            minYPos = $canvas.height - ($img.height * zoom) - 50;
+            minXPos = $canvas.width - ($img.width * zoom) - (padding/2);
+            minYPos = $canvas.height - ($img.height * zoom) - (padding/2);
 
           }
 
@@ -953,10 +1081,9 @@
             if (!val) {
               return;
             }
-
-
+			
             var proposedZoomLevel = to2Dp(zoom + val);
-
+			
             if ((proposedZoomLevel < maxZoomedInLevel) || (proposedZoomLevel > maxZoomedOutLevel)) {
               // image wont fill whole canvas
               // or image is too far zoomed in, it's gonna get pretty pixelated!
@@ -967,14 +1094,6 @@
             // console.log('zoom', zoom);
 
             updateDragBounds();
-
-            //  do image position adjustments so we don't see any gutter
-            if (proposedZoomLevel === maxZoomedInLevel) {
-              // image fills canvas perfectly, let's center it
-              ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-              ctx.drawImage($img, 0, 0, $canvas.width, $canvas.height);
-              return;
-            }
 
             newWidth = $img.width * zoom;
             newHeight = $img.height * zoom;
@@ -1006,28 +1125,73 @@
             var zoomGestureRatio = to2Dp(hyp / maxZoomGestureLength);
             var newZoomDiff = to2Dp((maxZoomedOutLevel - maxZoomedInLevel) * zoomGestureRatio * zoomWeight);
             return diffX > 0 ? -newZoomDiff : newZoomDiff;
+			
           }
+          
+		  function dataURItoBlob(dataURI) {
+			    var byteString, 
+			        mimestring;
+			
+			    if(dataURI.split(',')[0].indexOf('base64') !== -1 ) {
+			        byteString = atob(dataURI.split(',')[1]);
+			    } else {
+			        byteString = decodeURI(dataURI.split(',')[1]);
+			    }
+			
+			    mimestring = dataURI.split(',')[0].split(':')[1].split(';')[0];
+			
+			    var content = new Array();
+			    for (var i = 0; i < byteString.length; i++) {
+			        content[i] = byteString.charCodeAt(i);
+			    }
+			
+			    return new Blob([new Uint8Array(content)], {type: mimestring});
+		  }       
 
           // ---------- SCOPE FUNCTIONS ---------- //
 
-          $finalImg.onload = function() {
+		  scope.$watch('src', function(){
+			if(scope.src) {
+				if(scope.step != 3) {
+					if(typeof(scope.src) == 'Blob') {
+						fileReader.readAsDataURL(scope.src);	
+					} else {
+						loadImage(scope.src);
+					}
+				}		
+			} else {
+				scope.step = 1;
+				reset();
+			}
+		  });	
+
+		  scope.$watch('crop',function(){
+			if(scope.crop) {
+				scope.doCrop();
+				scope.crop = false;
+			}
+		  });	
+		  
+          $finalImg.onload = function() {			
             var tempCanvas = document.createElement('canvas');
-            tempCanvas.width = this.width - 100;
-            tempCanvas.height = this.height - 100;
+            tempCanvas.width = this.width - padding;
+            tempCanvas.height = this.height - padding;
             tempCanvas.style.display = 'none';
 
             var tempCanvasContext = tempCanvas.getContext('2d');
-            tempCanvasContext.drawImage($finalImg, -50, -50);
+            tempCanvasContext.drawImage($finalImg, -(padding/2), -(padding/2));
 
             $elm.getElementsByClassName('image-crop-section-final')[0].appendChild(tempCanvas);
-            scope.result = tempCanvas.toDataURL();
+			
+			var dataUrl = tempCanvas.toDataURL();
+			
+			scope.result = dataUrl;
+            scope.resultBlob = dataURItoBlob(dataUrl);
+            
             scope.$apply();
-
-            reset();
-
           };
 
-          scope.crop = function() {
+          scope.doCrop = function() {
             scope.croppedDataUri = $canvas.toDataURL();
             scope.step = 3;
           };
@@ -1089,6 +1253,7 @@
             addBodyEventListener('touchend', scope.onHandleMouseUp);
             addBodyEventListener('mousemove', scope.onHandleMouseMove);
             addBodyEventListener('touchmove', scope.onHandleMouseMove);
+			
           };
 
           $handle.addEventListener('touchstart', scope.onHandleMouseDown, false);
@@ -1117,7 +1282,6 @@
 
           $handle.addEventListener('touchend', scope.onHandleMouseUp, false);
 
-
           scope.onCanvasMouseMove = function(e) {
 
             e.preventDefault();
@@ -1126,8 +1290,6 @@
             if (!dragging) {
               return;
             }
-
-
 
             var diffX = startX - ((e.type === 'touchmove') ? e.changedTouches[0].clientX : e.clientX); // how far mouse has moved in current drag
             var diffY = startY - ((e.type === 'touchmove') ? e.changedTouches[0].clientY : e.clientY); // how far mouse has moved in current drag
@@ -1139,7 +1301,6 @@
           };
 
           $canvas.addEventListener('touchmove', scope.onCanvasMouseMove, false);
-
 
           var lastHandleX = null, lastHandleY = null;
 
@@ -1159,12 +1320,21 @@
             lastHandleX = (e.type === 'touchmove') ? e.changedTouches[0].clientX : e.clientX;
             lastHandleY = (e.type === 'touchmove') ? e.changedTouches[0].clientY : e.clientY;
 
-            var zoomVal = calcZoomLevel(diffX, diffY);
+            var zoomVal = calcZoomLevel(diffX, diffY);			
             zoomImage(zoomVal);
 
           };
 
-          $handle.addEventListener('touchmove', scope.onHandleMouseMove, false);
+          $handle.addEventListener('touchmove', scope.onHandleMouseMove, false);	  		 
+		  	  		  
+		  scope.onHandleMouseWheel = function(e){
+			  e.preventDefault();		  
+			  
+			  zoomImage(e.deltaY > 0 ? -0.05 : 0.05);			  
+		  };
+
+		  $canvas.addEventListener('mousewheel', scope.onHandleMouseWheel);
+		  $handle.addEventListener('mousewheel', scope.onHandleMouseWheel);
 
         }
       };
