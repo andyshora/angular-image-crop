@@ -759,7 +759,7 @@
   })();
 
   angular.module('ImageCropper',[])
-    .directive('imageCrop', function() {
+    .directive('imageCrop', function($q) {
 
       return {
         template: '<div id="image-crop-{{ rand }}" class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ canvasWidth }}" height="{{ canvasHeight }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div></section><section ng-style="sectionStyles" class="image-crop-section-final" ng-show="step==3"><img class="image-crop-final" ng-src="{{ croppedDataUri }}" /></section></div>',
@@ -832,140 +832,129 @@
           };
   		  
 		  function handleSize(base64ImageSrc) {
-		  
-			return new Promise(function(resolve, reject) {
-				
-				if(!maxSize) {
-					return resolve(base64ImageSrc);
-				}
-				
-				var img = new Image();
-				img.src = base64ImageSrc;
-				
-				img.onload = function() {
-				
-					var height = img.height;
-					var width = img.width;
-															
-					//if the size is already ok, just return the image
-					if(height <= maxSize && width <= maxSize) {						
-						return resolve(base64ImageSrc);
-					}			 	
-					
-					var ratio = width/height;
-					
-					if(ratio > 1) {
-						width = maxSize;
-						height = maxSize/ratio;
-					}
-					else {
-						width = maxSize*ratio;
-						height = maxSize;
-					}							
-					
-					width = Math.round(width);
-					height = Math.round(height);			 	
-					
-					var canvas = document.createElement("canvas");
-					canvas.width = width;
-					canvas.height = height;			 	
-					
-					var context = canvas.getContext("2d");
-									
-					context.drawImage(img, 0, 0, img.width,    img.height,      // source
-										   0, 0, canvas.width, canvas.height);  // destination	 
-					
-					context.save();
-								
-					var dataUrl = canvas.toDataURL();
-					
-					resolve(dataUrl);
+			var deferred = $q.defer();
+			if(!maxSize) {
+				return deferred.resolve(base64ImageSrc);
+			}
 
-				};
-					
-			});		  
-				
+			var img = new Image();
+			img.src = base64ImageSrc;
+
+			img.onload = function() {
+				var height = img.height;
+				var width = img.width;
+
+				//if the size is already ok, just return the image
+				if(height <= maxSize && width <= maxSize) {
+					return deferred.resolve(base64ImageSrc);
+				}
+
+				var ratio = width/height;
+
+				if(ratio > 1) {
+					width = maxSize;
+					height = maxSize/ratio;
+				}
+				else {
+					width = maxSize*ratio;
+					height = maxSize;
+				}
+
+				width = Math.round(width);
+				height = Math.round(height);
+
+				var canvas = document.createElement("canvas");
+				canvas.width = width;
+				canvas.height = height;
+
+				var context = canvas.getContext("2d");
+
+				context.drawImage(img, 0, 0, img.width,    img.height,      // source
+									   0, 0, canvas.width, canvas.height);  // destination
+
+				context.save();
+
+				var dataUrl = canvas.toDataURL();
+
+				deferred.resolve(dataUrl);
+
+			};
+			return deferred.promise;
 		  }
-					
+
 		  function handleEXIF(base64ImageSrc, exif) {
-		  		
-			return new Promise(function(resolve, reject) {
-								
-				var img = new Image();
-				img.src = base64ImageSrc;
-				
-				img.onload = function() {
-				
-					var canvas = document.createElement("canvas");
-					
-					if(exif.Orientation >= 5) {
-						canvas.width = img.height;
-						canvas.height = img.width;
-					} else {
-						canvas.width = img.width;
-						canvas.height = img.height;
-					}
-					
-					var context = canvas.getContext("2d");
-		
-					// change mobile orientation, if required
-					switch(exif.Orientation){
-						case 1:
-							// nothing
-							break;
-						case 2:
-							// horizontal flip
-							context.translate(img.width, 0);
-							context.scale(-1, 1);
-							break;
-						case 3:
-							// 180 rotate left
-							context.translate(img.width, img.height);
-							context.rotate(Math.PI);
-							break;
-						case 4:
-							// vertical flip
-							context.translate(0, img.height);
-							context.scale(1, -1);
-							break;
-						case 5:
-							// vertical flip + 90 rotate right
-							context.rotate(0.5 * Math.PI);
-							context.scale(1, -1);
-							break;
-						case 6:
-							// 90 rotate right
-							context.rotate(0.5 * Math.PI);
-							context.translate(0, -img.height);
-							break;
-						case 7:
-							// horizontal flip + 90 rotate right
-							context.rotate(0.5 * Math.PI);
-							context.translate(img.width, -img.height);
-							context.scale(-1, 1);
-							break;
-						case 8:
-							// 90 rotate left					 		                   
-							context.rotate(-0.5 * Math.PI);
-							context.translate(-img.width, 0);
-							break;
-						default:
-							break;
-					}
-					
-					context.drawImage(img, 0, 0);	
-					context.save();
-					
-					var dataUrl = canvas.toDataURL();
-					
-					resolve(dataUrl);										
-				
-				};
-				
-			});				
-				
+			var deferred = $q.defer();
+			var img = new Image();
+			img.src = base64ImageSrc;
+
+			img.onload = function() {
+				var canvas = document.createElement("canvas");
+
+				if(exif.Orientation >= 5) {
+					canvas.width = img.height;
+					canvas.height = img.width;
+				} else {
+					canvas.width = img.width;
+					canvas.height = img.height;
+				}
+
+				var context = canvas.getContext("2d");
+
+				// change mobile orientation, if required
+				switch(exif.Orientation){
+					case 1:
+						// nothing
+						break;
+					case 2:
+						// horizontal flip
+						context.translate(img.width, 0);
+						context.scale(-1, 1);
+						break;
+					case 3:
+						// 180 rotate left
+						context.translate(img.width, img.height);
+						context.rotate(Math.PI);
+						break;
+					case 4:
+						// vertical flip
+						context.translate(0, img.height);
+						context.scale(1, -1);
+						break;
+					case 5:
+						// vertical flip + 90 rotate right
+						context.rotate(0.5 * Math.PI);
+						context.scale(1, -1);
+						break;
+					case 6:
+						// 90 rotate right
+						context.rotate(0.5 * Math.PI);
+						context.translate(0, -img.height);
+						break;
+					case 7:
+						// horizontal flip + 90 rotate right
+						context.rotate(0.5 * Math.PI);
+						context.translate(img.width, -img.height);
+						context.scale(-1, 1);
+						break;
+					case 8:
+						// 90 rotate left	
+						context.rotate(-0.5 * Math.PI);
+						context.translate(-img.width, 0);
+						break;
+					default:
+						break;
+				}
+
+				context.drawImage(img, 0, 0);
+				context.save();
+
+				var dataUrl = canvas.toDataURL();
+
+				deferred.resolve(dataUrl);
+			};
+			return deferred.promise;
 		  }
-		  
+
 		  function loadImage(base64ImageSrc) {
 		  
 			//get the EXIF information from the image
