@@ -1,11 +1,12 @@
 {
-  "name": "angular-image-crop",
+  "name": "angular-image-crop-opt",
   "version": "2.0.0",
   "homepage": "http://andyshora.com/angular-image-cropper.html",
   "authors": [
-    "Andy Shora <andyshora@gmail.com>"
+    "Andy Shora <andyshora@gmail.com>",
+    "Stefan Hariton"
   ],
-  "description": "A better way to crop images client-side using AngularJS",
+  "description": "Andy Shora's angular-image-crop + fillStyle and safe moving",
   "main": [
     "image-crop.js",
     "image-crop-styles.css"

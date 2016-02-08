@@ -766,16 +766,18 @@
         replace: true,
         restrict: 'AE',
         scope: {
-		  crop: '=',
+          crop: '=',
           width: '@',
           height: '@',
           shape: '@',
-		  src: '=',
+          safeMove: '@',
+          fillColor: '@',
+          src: '=',
           resultBlob: '=',
-		  result: '=',
+          result: '=',
           step: '=',
           padding: '@',
-		  maxSize: '@'
+          maxSize: '@'
         },
         link: function (scope, element, attributes) {
 		  
@@ -789,6 +791,7 @@
 
           scope.canvasWidth = scope.width + padding;
           scope.canvasHeight = scope.height + padding;
+          scope.saveMove = scope.safeMove !== 0 ? scope.safeMove : true;
 
           var $elm = element[0];
 
@@ -806,7 +809,7 @@
           var maxZoomGestureLength = 0;
           var maxZoomedInLevel = 0, maxZoomedOutLevel = 2;
           var minXPos = 0, maxXPos = (padding/2), minYPos = 0, maxYPos = (padding/2); // for dragging bounds		  
-		  var maxSize = scope.maxSize ? Number(scope.maxSize) : null; //max size of the image in px
+          var maxSize = scope.maxSize ? Number(scope.maxSize) : null; //max size of the image in px
 		  
           var zoomWeight = .6;
           var ctx = $canvas.getContext('2d');
@@ -969,106 +972,108 @@
 		  function loadImage(base64ImageSrc) {
 		  
 			//get the EXIF information from the image
-            var byteString = atob(base64ImageSrc.split(',')[1]);
-            var binary = new BinaryFile(byteString, 0, byteString.length);
-            exif = EXIF.readFromBinaryFile(binary);		  
+      var byteString = atob(base64ImageSrc.split(',')[1]);
+      var binary = new BinaryFile(byteString, 0, byteString.length);
+      exif = EXIF.readFromBinaryFile(binary);		  
            
-		    //handle image size
-            handleSize(base64ImageSrc).then(function(base64ImageSrc) {
+		  //handle image size
+      handleSize(base64ImageSrc).then(function(base64ImageSrc) {
 			
-				//if the image has EXIF orientation..
-				if (exif && exif.Orientation && exif.Orientation > 1) {			
-					return handleEXIF(base64ImageSrc, exif);
-				} 
-				//otherwise, just return the image without any treatment
-				else {
-					return base64ImageSrc;
-				}
+			//if the image has EXIF orientation..
+			if (exif && exif.Orientation && exif.Orientation > 1) {			
+        return handleEXIF(base64ImageSrc, exif);
+			} 
+			//otherwise, just return the image without any treatment
+			else {
+				return base64ImageSrc;
+      }
 				
-			}).then(function(base64ImageSrc) {
-			
-				$img.src = base64ImageSrc;
+      }).then(function(base64ImageSrc) {
+        $img.src = base64ImageSrc;
 				
-			}).catch(function(error) {							
-				console.log(error);				
-			});    
-			
-		  };
+        }).catch(function(error) {							
+          console.log(error);				
+        });    
+      };
 		  
-          // ---------- EVENT HANDLERS ---------- //
-          fileReader.onload = function(e) {
-          	
-          	loadImage(this.resultBlob);	
+      // ---------- EVENT HANDLERS ---------- //
+      fileReader.onload = function(e) {
+        loadImage(this.resultBlob);	
+      };	  
 
-          };	  
+      $img.onload = function() {
+        scope.step = 2;
+        scope.$apply();		  
 
-          $img.onload = function() {
+        ctx = redraw(ctx, $img, 0, 0);
+
+        imgWidth = $img.width;
+        imgHeight = $img.height;
+
+        minLeft = (scope.width + padding) - this.width;
+        minTop = (scope.height + padding) - this.height;
+        newWidth = imgWidth;
+        newHeight = imgHeight;
+        if(imgWidth >= imgHeight) {
+          maxZoomedInLevel = ($canvas.height - padding) / imgHeight;
+        } else {
+          maxZoomedInLevel = ($canvas.width - padding) / imgWidth;
+        }		
+
+        maxZoomGestureLength = to2Dp(Math.sqrt(Math.pow($canvas.width, 2) + Math.pow($canvas.height, 2)));
+
+        updateDragBounds();
+        var initialX = Math.round((minXPos + maxXPos)/2);
+        var initialY = Math.round((minYPos + maxYPos)/2);
+
+        moveImage(initialX, initialY);
+			};
 		  
-			scope.step = 2;
-			scope.$apply();		  
-			
-            ctx.drawImage($img, 0, 0);
+      function reset() {
+        files = [];
+        zoom = 1;
+			  currentX = 0; 
+			  currentY = 0; 
+			  dragging = false; 
+			  startX = 0; 
+			  startY = 0; 
+			  zooming = false;
+        ctx.clearRect(0, 0, $canvas.width, $canvas.height);            
+          $img.src = '';
+        }		  
 
-            imgWidth = $img.width;
-            imgHeight = $img.height;
-
-            minLeft = (scope.width + padding) - this.width;
-            minTop = (scope.height + padding) - this.height;
-            newWidth = imgWidth;
-            newHeight = imgHeight;
-            
-			if(imgWidth >= imgHeight) {
-				maxZoomedInLevel = ($canvas.height - padding) / imgHeight;
-			} else {
-				maxZoomedInLevel = ($canvas.width - padding) / imgWidth;
-			}		
-
-            maxZoomGestureLength = to2Dp(Math.sqrt(Math.pow($canvas.width, 2) + Math.pow($canvas.height, 2)));
-
-            updateDragBounds();
-			
-			var initialX = Math.round((minXPos + maxXPos)/2);
-			var initialY = Math.round((minYPos + maxYPos)/2);
-						
-			moveImage(initialX, initialY);
-			
+        // ---------- PRIVATE FUNCTIONS ---------- //
+        function moveImage(x, y) {
+          if (scope.safeMove) {
+            x = x < minXPos ? minXPos : x;
+            x = x > maxXPos ? maxXPos : x;
+            y = y < minYPos ? minYPos : y;
+            y = y > maxYPos ? maxYPos : y;      
           };
-		  
-          function reset() {
-            files = [];
-            zoom = 1;
-			currentX = 0; 
-			currentY = 0; 
-			dragging = false; 
-			startX = 0; 
-			startY = 0; 
-			zooming = false;
-            ctx.clearRect(0, 0, $canvas.width, $canvas.height);            
-            $img.src = '';
-          }		  
 
-          // ---------- PRIVATE FUNCTIONS ---------- //
-          function moveImage(x, y) {
+          targetX = x;
+          targetY = y;
 			
-			x = x < minXPos ? minXPos : x;
-			x = x > maxXPos ? maxXPos : x;
-			y = y < minYPos ? minYPos : y;
-			y = y > maxYPos ? maxYPos : y;			
+          ctx = redraw(ctx, $img, x, y, newWidth, newHeight);
+          return x == minXPos || x == maxXPos || y == minYPos || y == maxYPos;
+        }
 
-            targetX = x;
-            targetY = y;
-			
-            ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-            ctx.drawImage($img, x, y, newWidth, newHeight);
-			
-			return x == minXPos || x == maxXPos || y == minYPos || y == maxYPos;
+        function redraw(canvas, $img, x, y, newWidth, newHeight) {
+          ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+          if (scope.fillColor !== undefined) {
+            ctx.fillStyle = scope.fillColor;
+            ctx.fillRect(0, 0, $canvas.width, $canvas.height);
           }
 
-          function to2Dp(val) {
-            return Math.round(val * 1000) / 1000;
-          }
+          ctx.drawImage($img, x, y, newWidth, newHeight);
+          return ctx;
+        }
 
-          function updateDragBounds() {
+        function to2Dp(val) {
+          return Math.round(val * 1000) / 1000;
+        }
+
+        function updateDragBounds() {
             // $img.width, $canvas.width, zoom
 
             minXPos = $canvas.width - ($img.width * zoom) - (padding/2);
@@ -1115,8 +1120,8 @@
             }
 
             // check if image is still going to fit the bounds of the box
-            ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-            ctx.drawImage($img, newXPos, newYPos, newWidth, newHeight);
+
+            ctx = redraw(ctx, $img, newXPos, newYPos, newWidth, newHeight);
           }
 
           function calcZoomLevel(diffX, diffY) {
