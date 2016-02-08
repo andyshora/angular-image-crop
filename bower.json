@@ -1,10 +1,10 @@
 {
-  "name": "angular-image-crop-opt",
+  "name": "angular-image-crop",
   "version": "2.0.0",
   "homepage": "http://andyshora.com/angular-image-cropper.html",
   "authors": [
     "Andy Shora <andyshora@gmail.com>",
-    "Stefan Hariton <"
+    "Stefan Hariton"
   ],
   "description": "A better way to crop images client-side using AngularJS",
   "main": [
