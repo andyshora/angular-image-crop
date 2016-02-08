@@ -1044,7 +1044,7 @@
 
         // ---------- PRIVATE FUNCTIONS ---------- //
         function moveImage(x, y) {
-          if (scope.safeMove) {
+          if (scope.safeMove === "true") {
             x = x < minXPos ? minXPos : x;
             x = x > maxXPos ? maxXPos : x;
             y = y < minYPos ? minYPos : y;
@@ -1055,7 +1055,7 @@
           targetY = y;
 			
           ctx = redraw(ctx, $img, x, y, newWidth, newHeight);
-          return x == minXPos || x == maxXPos || y == minYPos || y == maxYPos;
+          // return x == minXPos || x == maxXPos || y == minYPos || y == maxYPos;
         }
 
         function redraw(canvas, $img, x, y, newWidth, newHeight) {

@@ -28,6 +28,8 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 * max-size (integer) - max size of the image, in pixels
 * shape (string) - the cropping guideline shape (circle/square)
 * step (bound integer) - the variable which dictates which step the user will see (used for resetting purposes)
+* safe-move(string true/false) - allow moving the image under the cropping area without restrictions
+* fill-color(string color name / HEX) - the color to fill with the empty space (used with safe-move);
 * src (bound Blob or base64 string) - scope variable that will be the source image for the crop
 * result (bound string) - the variable which will have the resulting data uri bound to it
 * result-blob (bound Blob) - the variable which will have the resulting data as a Blob object
@@ -40,6 +42,8 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
  data-width="150"
  data-shape="square"
  data-step="imageCropStep"
+ data-safe-move='true'
+ data-fill-color="red"
  src="imgSrc"
  data-result="result"
  data-result-blob="resultBlob"

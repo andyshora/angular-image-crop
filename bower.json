@@ -4,9 +4,9 @@
   "homepage": "http://andyshora.com/angular-image-cropper.html",
   "authors": [
     "Andy Shora <andyshora@gmail.com>",
-    "Stefan Hariton"
+    "Stefan Hariton <"
   ],
-  "description": "Andy Shora's angular-image-crop + fillStyle and safe moving",
+  "description": "A better way to crop images client-side using AngularJS",
   "main": [
     "image-crop.js",
     "image-crop-styles.css"
