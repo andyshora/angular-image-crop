@@ -12,7 +12,9 @@
 		"image-crop-styles.css"
 	],
 	"ignore": [
-		"src"
+		"src/*.js",
+		"CONTRIBUTING.md",
+		"Gruntfile.js"
 	],
 	"keywords": [
 		"angular",
