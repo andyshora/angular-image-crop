@@ -3,8 +3,8 @@
 	"version": "2.1.0",
 	"description": "A better way to crop images client-side using AngularJS",
 	"main": [
-		"image-crop.js",
-		"image-crop-styles.css"
+		"dist/angular-image-crop.min.js",
+		"dist/angular-image-crop-styles.min.css"
 	],
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
