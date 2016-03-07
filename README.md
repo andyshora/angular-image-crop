@@ -14,11 +14,25 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 # Browser Support
 * IE10+, Android 3+, iOS 6+, basically all modern browsers!
 
+
+# Installation
+Get the library and its stylesheet using one of the following ways:
+
+1. **Github**
+ - [unminified] : [angular-image-crop.js](https://raw.githubusercontent.com/AshBardhan/angular-image-crop/master/dist/angular-image-crop.js) and [angular-image-crop.css](https://raw.githubusercontent.com/AshBardhan/angular-image-crop/master/dist/angular-image-crop.css)
+ - [minified] : [angular-image-crop.min.js](https://raw.githubusercontent.com/AshBardhan/angular-image-crop/master/dist/angular-image-crop.min.js) and [angular-image-crop.min.css](https://raw.githubusercontent.com/AshBardhan/angular-image-crop/master/dist/angular-image-crop.min.css)
+
+2. **Bower**
+
+ ```
+ bower install angular-image-crop
+ ```
+
 # Usage
 
-1. Add the dependency : `angular.module('myApp',['ImageCropper'])`
-2. Include the stylesheet
-3. Initiatlise the directive [see standalone JSBin](http://jsbin.com/fovovu/1/edit?javascript,output) for example code.
+1. Include both files inside the `<head>` element
+2. Add the dependency : `angular.module('myApp',['ImageCropper'])`
+3. Initialise the directive [see standalone JSBin](http://jsbin.com/fovovu/1/edit?javascript,output) for example code.
 
 ## Parameters
 
@@ -35,7 +49,7 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 
 ### Example markup
 ```html
-<image-crop			 
+<image-crop
  data-height="200"
  data-width="150"
  data-shape="square"
@@ -46,7 +60,7 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
  crop="initCrop"
  padding="250"
  max-size="1024"
-></image-crop>	
+></image-crop>
 ```
 
 # See a standalone working example
