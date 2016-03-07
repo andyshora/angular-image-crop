@@ -1,7 +1,8 @@
-/* Some of these styles you can override, things like colors,
+/*
+ * ANGULAR-IMAGE-CROP Basic Styling
+ * Some of these styles you can override, things like colors,
  * however some styles are required for the structure, and are critical to this module behaving properly!
  */
-/* Core component styles */
 .ng-image-crop {
   text-align: center;
   margin: 0 auto;
@@ -12,15 +13,12 @@
   -o-user-select: none;
   user-select: none;
 }
-/* Each of the 3 steps in the process are contained within sections */
 .ng-image-crop > section {
   background: #ccc;
 }
-/* The cropping button */
 .ng-image-crop button {
   margin-top: 10px;
 }
-/* The dashed cropping guideline */
 .ng-image-crop .cropping-guide {
   display: block;
   background: rgba(255, 255, 255, 0.3);
@@ -28,21 +26,11 @@
   position: absolute;
   pointer-events: none;
 }
-/* The circular themed cropping guideline */
-.ng-image-crop--circle .cropping-guide {
-  border-radius: 50%;
-  -webkit-border-radius: 50%;
-  -moz-border-radius: 50%;
-  -ms-border-radius: 50%;
-  -o-border-radius: 50%;
-}
-/* The canvas where the user positions the image via dragging and zooming */
 .ng-image-crop .cropping-canvas {
   background: rgba(255, 255, 255, 0.3);
   margin: 0 auto;
   cursor: move;
 }
-/* The overlayed draggable zoom handle in the corner of the module */
 .ng-image-crop .zoom-handle {
   display: block;
   position: absolute;
@@ -54,7 +42,6 @@
   cursor: move;
   border-radius: 200px 50px;
 }
-/* The text within the zoom handle */
 .ng-image-crop .zoom-handle > span {
   color: rgba(0, 0, 0, 0.5);
   -webkit-transform: rotate(-45deg);
@@ -65,4 +52,11 @@
   display: block;
   position: relative;
   top: 32px;
+}
+.ng-image-crop--circle .cropping-guide {
+  border-radius: 50%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
 }
