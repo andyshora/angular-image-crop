@@ -22,7 +22,9 @@
 		"avatar"
 	],
 	"authors": [
-		"Andy Shora <andyshora@gmail.com>",
+		"Andy Shora <andyshora@gmail.com>"
+	],
+	"contributors": [
 		"Ashish Bardhan <ashbardhan@gmail.com>"
 	],
 	"license": "MIT",
