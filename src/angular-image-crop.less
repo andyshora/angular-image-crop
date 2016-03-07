@@ -4,16 +4,21 @@
  * however some styles are required for the structure, and are critical to this module behaving properly!
  */
 
+// Vendor-prefixed CSS mixin - e.g. .vendor(border-radius, 4px);`
+.vendor(@property, @value) {
+	-webkit-@{property}: @value;
+	-moz-@{property}: @value;
+	-ms-@{property}: @value;
+	-o-@{property}: @value;
+	@{property}: @value;
+}
+
 // Core component styles
 .ng-image-crop {
 	text-align: center;
 	margin: 0 auto;
 	position: relative;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	-o-user-select: none;
-	user-select: none;
+	.vendor(user-select, none);
 
 	// Each of the 3 steps in the process are contained within sections
 	> section {
@@ -56,11 +61,7 @@
 		// The text within the zoom handle
 		> span {
 			color: rgba(0, 0, 0, 0.5);
-			-webkit-transform: rotate(-45deg);
-			-moz-transform: rotate(-45deg);
-			-ms-transform: rotate(-45deg);
-			-o-transform: rotate(-45deg);
-			transform: rotate(-45deg);
+			.vendor(transform, rotate(-45deg));
 			display: block;
 			position: relative;
 			top: 32px;
@@ -70,11 +71,7 @@
 	// The circular themed cropping guideline
 	&--circle {
 		.cropping-guide {
-			border-radius: 50%;
-			-webkit-border-radius: 50%;
-			-moz-border-radius: 50%;
-			-ms-border-radius: 50%;
-			-o-border-radius: 50%;
+			.vendor(border-radius, 50%);
 		}
 	}
 }
