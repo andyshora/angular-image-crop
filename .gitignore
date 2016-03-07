@@ -1,0 +1,18 @@
+# Created by http://gitignore.io
+
+### SublimeText ###
+*.sublime-*
+
+### vim related ###
+*.swp
+*.swo
+
+### OSX related ###
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+### IDE-related ###
+.idea
+*.iml
