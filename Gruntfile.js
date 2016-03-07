@@ -2,11 +2,11 @@ module.exports = function (grunt) {
 	grunt.initConfig({
 		'pkg': grunt.file.readJSON('package.json'),
 		'less': {
-			'dev': {
+			'unminified': {
 				src: ['src/<%= pkg.name %>.less'],
 				dest: 'dist/<%= pkg.name %>.css'
 			},
-			'prod': {
+			'minified': {
 				options: {
 					compress: true
 				},
@@ -19,9 +19,6 @@ module.exports = function (grunt) {
 				src: 'src/<%= pkg.name %>.js',
 				dest: 'dist/<%= pkg.name %>.js'
 			}
-		},
-		clean: {
-			'folder': ['dist/']
 		},
 		uglify: {
 			'js': {
@@ -44,8 +41,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-contrib-less');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
-	grunt.registerTask('build', ['clean', 'less', 'copy', 'uglify']);
+	grunt.registerTask('default', ['less', 'copy', 'uglify']);
 };
