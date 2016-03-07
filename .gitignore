@@ -16,3 +16,7 @@ Icon
 ### IDE-related ###
 .idea
 *.iml
+
+### Package folders ###
+bower_components/
+node_modules/

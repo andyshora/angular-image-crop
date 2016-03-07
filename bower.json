@@ -11,7 +11,9 @@
 		"image-crop.js",
 		"image-crop-styles.css"
 	],
-	"ignore": [],
+	"ignore": [
+		"src"
+	],
 	"keywords": [
 		"angular",
 		"angularjs",
