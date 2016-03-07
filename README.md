@@ -18,7 +18,7 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 
 1. Add the dependency : `angular.module('myApp',['ImageCropper'])`
 2. Include the stylesheet
-3. Initiatlise the directive [see standalone JSBin](http://jsbin.com/fovovu/1/edit?javascript,output) for example code.
+3. Initialise the directive [see standalone JSBin](http://jsbin.com/fovovu/1/edit?javascript,output) for example code.
 
 ## Parameters
 
@@ -35,7 +35,7 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 
 ### Example markup
 ```html
-<image-crop			 
+<image-crop
  data-height="200"
  data-width="150"
  data-shape="square"
@@ -46,7 +46,7 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
  crop="initCrop"
  padding="250"
  max-size="1024"
-></image-crop>	
+></image-crop>
 ```
 
 # See a standalone working example
