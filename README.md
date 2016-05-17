@@ -32,6 +32,7 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 * result (bound string) - the variable which will have the resulting data uri bound to it
 * result-blob (bound Blob) - the variable which will have the resulting data as a Blob object
 * crop (bound boolean) - scope variable that must be set to true when the image is ready to be cropped
+* result-format - setting the result file format if different from default "image/png", optional
 
 ### Example markup
 ```html
@@ -43,6 +44,7 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
  src="imgSrc"
  data-result="result"
  data-result-blob="resultBlob"
+ data-result-format="image/jpeg"
  crop="initCrop"
  padding="250"
  max-size="1024"
