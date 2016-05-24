@@ -27,7 +27,7 @@
 		
 			var files = e.target.files;
 		
-     		var fileReader = new FileReader();
+     			var fileReader = new FileReader();
 			fileReader.readAsDataURL(files[0]);		
 			
 			fileReader.onload = function(e) {
@@ -35,14 +35,14 @@
 				$scope.$apply();
 			};
 			
-		}		
+		};		
 	   
 		$scope.clear = function() {
 			 $scope.imageCropStep = 1;
 			 delete $scope.imgSrc;
 			 delete $scope.result;
 			 delete $scope.resultBlob;
-		};
+		}
 		
 	}]);
 
@@ -95,7 +95,7 @@
 			<input type="file" name="fileInput" id="fileInput" onchange="angular.element(this).scope().fileChanged(event)" />
 		</div>			
 	  
-	   <div ng-show="imageCropStep == 2">
+		<div ng-show="imageCropStep == 2">
 		  <!-- <image-crop			 
 			 data-height="200" //shape's height
 			 data-width="150" //shape's width
@@ -109,39 +109,37 @@
 			 max-size="1024" //max of the image, in pixels
 		   ></image-crop> -->
 		   
-		   <image-crop			 
-			 data-height="200"
-			 data-width="150"
-			 data-shape="square"
-			 data-step="imageCropStep"
-			 src="imgSrc"
-			 data-result="result"
-			 data-result-blob="resultBlob"
-			 crop="initCrop"
-			 padding="250"
-			 max-size="1024"
-		   ></image-crop>		   
-	   </div>
+			<image-crop			 
+			 	data-height="200"
+			 	data-width="150"
+			 	data-shape="square"
+			 	data-step="imageCropStep"
+			 	src="imgSrc"
+			 	data-result="result"
+			 	data-result-blob="resultBlob"
+			 	crop="initCrop"
+			 	padding="250"
+			 	max-size="1024">
+			</image-crop>		   
+		</div>
        	   
-	   <div ng-show="imageCropStep == 2">
-		   <br/>
-		   <button ng-click="clear()">Cancel</button>
-		   <button ng-click="initCrop = true">Crop</button>		
-	   </div>		  
+		<div ng-show="imageCropStep == 2">
+			<br/>
+			<button ng-click="clear()">Cancel</button>
+			<button ng-click="initCrop = true">Crop</button>		
+		</div>		  
 	   
-	   <div ng-show="imageCropStep == 3">
-	   
-	     <h2>Result</h2>
+		<div ng-show="imageCropStep == 3">
+			
+			<h2>Result</h2>
+			<p>The data-result-blob property is a Blob object, which is necessary in some upload libraries like <a href="https://github.com/nervgh/angular-file-upload" target="_blank">Angular File Upload</a></p>
+			<p>Image using the data uri:</p>
+			<img ng-src="{{result}}"></img>
+			<p>The Base64 String used in the image above:</p>         
+			<textarea class="result-datauri">{{ result }}</textarea>
+			<button ng-click="clear()">Clear</button>	
        
-		 <p>The data-result-blob property is a Blob object, which is necessary in some upload libraries like <a href="https://github.com/nervgh/angular-file-upload" target="_blank">Angular File Upload</a></p>
-		 <p>Image using the data uri:</p>
-		 <img ng-src="{{result}}"></img>
-         <p>The Base64 String used in the image above:</p>         
-         <textarea class="result-datauri">{{ result }}</textarea>
-		 <button ng-click="clear()">Clear</button>	
-       
-	  </div>
-	   
-     </div>
+		</div>
+	</div>
   </body>
 </html>
