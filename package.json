@@ -1,0 +1,25 @@
+{
+  "name": "angular-image-crop",
+  "version": "2.0.0",
+  "description": "A better way to crop images client-side using AngularJS",
+  "homepage": "http://andyshora.com/angular-image-cropper.html",
+  "author": "Andy Shora <andyshora@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:andyshora/angular-image-crop.git"
+  },
+  "keywords": [
+    "angular",
+    "angularjs",
+    "image",
+    "crop",
+    "cropper",
+    "avatar"
+  ],
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/andyshora/angular-image-crop/issues",
+    "new": "https://github.com/andyshora/angular-image-crop/issues/new"
+  }
+}
