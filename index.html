@@ -12,46 +12,46 @@
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.11/angular.min.js"></script>
   <!-- REQUIRED 2/3 - styles for the image crop component -->
   <link rel="stylesheet" href="image-crop-styles.css">
-  
+
   <script>
-  
+
     var myApp = null;
-	
+
     (function() {
 
-    angular.module('myApp', ['ImageCropper'])  
-	  
+    angular.module('myApp', ['ImageCropper'])
+
 	.controller('MainController', ['$scope', function($scope) {
-		
-		$scope.fileChanged = function(e) {			
-		
+
+		$scope.fileChanged = function(e) {
+
 			var files = e.target.files;
-		
+
      		var fileReader = new FileReader();
-			fileReader.readAsDataURL(files[0]);		
-			
+			fileReader.readAsDataURL(files[0]);
+
 			fileReader.onload = function(e) {
 				$scope.imgSrc = this.result;
 				$scope.$apply();
 			};
-			
-		}		
-	   
+
+		}
+
 		$scope.clear = function() {
 			 $scope.imageCropStep = 1;
 			 delete $scope.imgSrc;
 			 delete $scope.result;
 			 delete $scope.resultBlob;
 		};
-		
+
 	}]);
 
     })();
   </script>
-  
+
   <!-- REQUIRED 3/3 - the image crop directive -->
   <script src="image-crop.js"></script>
-  
+
   <style>
     /* Styles for this demo page */
     body {
@@ -115,6 +115,8 @@
 			 data-shape="square"
 			 data-step="imageCropStep"
 			 src="imgSrc"
+			 data-safe-move="false"
+			 data-fill-color="red"
 			 data-result="result"
 			 data-result-blob="resultBlob"
 			 crop="initCrop"
