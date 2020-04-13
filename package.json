@@ -1,6 +1,6 @@
 {
   "name": "angular-image-crop",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "A better way to crop images client-side using AngularJS",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

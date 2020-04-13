@@ -1,5 +1,5 @@
 /**
- * AngularJS Directive - Image Crop v2.0.0
+ * AngularJS Directive - Image Crop v2.0.2
  * Copyright (c) 2014 Andy Shora, andyshora@gmail.com, andyshora.com
  * Licensed under the MPL License [http://www.nihilogic.dk/licenses/mpl-license.txt]
  */
