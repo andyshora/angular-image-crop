@@ -5,12 +5,19 @@
   "authors": [
     "Andy Shora <andyshora@gmail.com>"
   ],
+  "contributors": [
+    "Ashish Bardhan <ashbardhan@gmail.com>"
+  ],
   "description": "A better way to crop images client-side using AngularJS",
   "main": [
-    "image-crop.js",
-    "image-crop-styles.css"
+    "dist/angular-image-crop.min.js",
+    "dist/angular-image-crop-styles.min.css"
   ],
-  "ignore": [],
+  "ignore": [
+    "src/*.js",
+    "CONTRIBUTING.md",
+    "Gruntfile.js"
+  ],
   "keywords": [
     "angular",
     "angularjs",

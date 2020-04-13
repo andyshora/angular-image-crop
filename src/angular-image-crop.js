@@ -1,5 +1,5 @@
 /**
- * AngularJS Directive - Image Crop v1.1.0
+ * AngularJS Directive - Image Crop v2.0.0
  * Copyright (c) 2014 Andy Shora, andyshora@gmail.com, andyshora.com
  * Licensed under the MPL License [http://www.nihilogic.dk/licenses/mpl-license.txt]
  */
@@ -760,6 +760,7 @@
 
   angular.module('ImageCropper',[])
     .directive('imageCrop', function($q) {
+      'ngInject'; // Need for ngAnnotate, before uglify
 
       return {
         template: '<div id="image-crop-{{ rand }}" class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ canvasWidth }}" height="{{ canvasHeight }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div></section><section ng-style="sectionStyles" class="image-crop-section-final" ng-show="step==3"><img class="image-crop-final" ng-src="{{ croppedDataUri }}" /></section></div>',
