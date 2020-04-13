@@ -759,7 +759,7 @@
   })();
 
   angular.module('ImageCropper',[])
-    .directive('imageCrop', function() {
+    .directive('imageCrop', function($q) {
 
       return {
         template: '<div id="image-crop-{{ rand }}" class="ng-image-crop ng-image-crop--{{ shape }}" ng-style="moduleStyles"><section ng-style="sectionStyles" ng-show="step==1"></section><section ng-style="sectionStyles" ng-show="step==2"><canvas class="cropping-canvas" width="{{ canvasWidth }}" height="{{ canvasHeight }}" ng-mousemove="onCanvasMouseMove($event)" ng-mousedown="onCanvasMouseDown($event)"></canvas><div ng-style="croppingGuideStyles" class="cropping-guide"></div><div class="zoom-handle" ng-mousemove="onHandleMouseMove($event)" ng-mousedown="onHandleMouseDown($event)" ng-mouseup="onHandleMouseUp($event)"><span>&larr; zoom &rarr;</span></div></section><section ng-style="sectionStyles" class="image-crop-section-final" ng-show="step==3"><img class="image-crop-final" ng-src="{{ croppedDataUri }}" /></section></div>',
@@ -806,7 +806,7 @@
           var maxZoomGestureLength = 0;
           var maxZoomedInLevel = 0, maxZoomedOutLevel = 2;
           var minXPos = 0, maxXPos = (padding/2), minYPos = 0, maxYPos = (padding/2); // for dragging bounds		  
-		  var maxSize = scope.maxSize ? Number(scope.maxSize) : null; //max size of the image in px
+		      var maxSize = scope.maxSize ? Number(scope.maxSize) : null; //max size of the image in px
 		  
           var zoomWeight = .6;
           var ctx = $canvas.getContext('2d');
@@ -833,7 +833,7 @@
   		  
 		  function handleSize(base64ImageSrc) {
 		  
-			return new Promise(function(resolve, reject) {
+			return $q(function(resolve, reject) {
 				
 				if(!maxSize) {
 					return resolve(base64ImageSrc);
@@ -889,7 +889,7 @@
 					
 		  function handleEXIF(base64ImageSrc, exif) {
 		  		
-			return new Promise(function(resolve, reject) {
+			return $q(function(resolve, reject) {
 								
 				var img = new Image();
 				img.src = base64ImageSrc;
