@@ -14,11 +14,23 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 # Browser Support
 * IE10+, Android 3+, iOS 6+, basically all modern browsers!
 
+# Installation
+Get the library and its stylesheet using one of the following ways:
+
+1. **Github**
+ - [unminified] : [angular-angular-image-crop.js](https://raw.githubusercontent.com/andyshora/angular-image-crop/master/dist/angular-image-crop.js) and [angular-image-crop.css](https://raw.githubusercontent.com/andyshora/angular-image-crop/master/dist/angular-image-crop.css)
+ - [minified] : [angular-image-crop.min.js](https://raw.githubusercontent.com/andyshora/angular-image-crop/master/dist/angular-image-crop.min.js) and [angular-image-crop.min.css](https://raw.githubusercontent.com/andyshora/angular-image-crop/master/dist/angular-image-crop.min.css)
+ 
+2. **Bower**
+ 
+  ```
+  bower install angular-image-crop
+  ```
 # Usage
 
-1. Add the dependency : `angular.module('myApp',['ImageCropper'])`
-2. Include the stylesheet
-3. Initiatlise the directive [see standalone JSBin](http://jsbin.com/fovovu/1/edit?javascript,output) for example code.
+1. Include both files inside the `<head>` element
+2. Add the dependency : `angular.module('myApp',['ImageCropper'])`
+3. Initialise the directive [see standalone JSBin](http://jsbin.com/fovovu/1/edit?javascript,output) for example code.
 
 ## Parameters
 
@@ -28,25 +40,31 @@ I'm attempting to make a self-contained AngularJS Directive which will allow you
 * max-size (integer) - max size of the image, in pixels
 * shape (string) - the cropping guideline shape (circle/square)
 * step (bound integer) - the variable which dictates which step the user will see (used for resetting purposes)
+* safe-move(string true/false) - allow moving the image under the cropping area without restrictions
+* fill-color(string color name / HEX) - the color to fill with the empty space (used with safe-move)
 * src (bound Blob or base64 string) - scope variable that will be the source image for the crop
 * result (bound string) - the variable which will have the resulting data uri bound to it
 * result-blob (bound Blob) - the variable which will have the resulting data as a Blob object
 * crop (bound boolean) - scope variable that must be set to true when the image is ready to be cropped
+* result-format - setting the result file format if different from default "image/png", optional
 
 ### Example markup
 ```html
-<image-crop			 
+<image-crop
  data-height="200"
  data-width="150"
  data-shape="square"
  data-step="imageCropStep"
+ data-safe-move='true'
+ data-fill-color="red"
  src="imgSrc"
  data-result="result"
  data-result-blob="resultBlob"
+ data-result-format="image/jpeg"
  crop="initCrop"
  padding="250"
  max-size="1024"
-></image-crop>	
+></image-crop>
 ```
 
 # See a standalone working example
