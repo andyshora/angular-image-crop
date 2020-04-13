@@ -30,7 +30,7 @@ module.exports = function (grunt) {
           warnings: true,
           compress: true,
           mangle: {
-            reserved: ['BinaryFile']
+            reserved: ['BinaryFile', 'EXIF']
           },
           output: {
             beautify: false,
