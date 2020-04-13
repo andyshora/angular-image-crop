@@ -17,6 +17,9 @@
     "cropper",
     "avatar"
   ],
+  "dependencies": {
+    "angular": "^1.5.11"
+  },
   "readmeFilename": "README.md",
   "bugs": {
     "url": "https://github.com/andyshora/angular-image-crop/issues",
