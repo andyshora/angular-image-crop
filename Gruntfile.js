@@ -29,6 +29,9 @@ module.exports = function (grunt) {
           toplevel: true,
           warnings: true,
           compress: true,
+          mangle: {
+            reserved: ['BinaryFile']
+          },
           output: {
             beautify: false,
             preamble: "/* AngularJS Directive - <%= pkg.name %> v<%= pkg.version %> (minified) - license <%= pkg.license %> */",
