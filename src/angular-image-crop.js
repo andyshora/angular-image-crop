@@ -778,7 +778,8 @@
 		  result: '=',
           step: '=',
           padding: '@',
-		  maxSize: '@'
+          maxSize: '@',
+          resultFormat: '@'
         },
         link: function (scope, element, attributes) {
 		  
@@ -789,6 +790,7 @@
           scope.shape = scope.shape || 'circle';
           scope.width = parseInt(scope.width, 10) || 300;
           scope.height = parseInt(scope.height, 10) || 300;
+          scope.resultFormat = scope.resultFormat || 'image/png';
 
           scope.canvasWidth = scope.width + padding;
           scope.canvasHeight = scope.height + padding;
@@ -1195,16 +1197,16 @@
 
             $elm.getElementsByClassName('image-crop-section-final')[0].appendChild(tempCanvas);
 			
-			var dataUrl = tempCanvas.toDataURL();
+			      var dataUrl = tempCanvas.toDataURL(scope.resultFormat);
 			
-			scope.result = dataUrl;
+			      scope.result = dataUrl;
             scope.resultBlob = dataURItoBlob(dataUrl);
             
             scope.$apply();
           };
 
           scope.doCrop = function() {
-            scope.croppedDataUri = $canvas.toDataURL();
+            scope.croppedDataUri = $canvas.toDataURL(scope.resultFormat);
             scope.step = 3;
           };
 
